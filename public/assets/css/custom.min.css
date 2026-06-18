@@ -1,0 +1,121 @@
+/*
+Template Name: Herozi - Admin & Dashboard Template
+Author: SRBThemes
+Version: 1.0.0
+File: Custom Css File
+*/
+
+/* ===== DataTables Sticky Header & Scroll ===== */
+
+/* Scroll body container */
+.dataTables_scrollBody {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+}
+
+/* Sticky thead inside scroll body */
+.dataTables_scrollHead {
+    position: sticky !important;
+    top: 0;
+    z-index: 2;
+    background: var(--bs-card-bg, #fff);
+}
+
+/* Make sure header cells have background */
+.dataTables_scrollHead thead th {
+    background: var(--bs-card-bg, #fff) !important;
+    border-bottom: 2px solid var(--bs-border-color, #e9ebec) !important;
+    white-space: nowrap;
+}
+
+/* Ensure scroll wrapper takes proper height */
+.dataTables_scroll {
+    position: relative;
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] .dataTables_scrollHead,
+[data-bs-theme="dark"] .dataTables_scrollHead thead th {
+    background: var(--bs-card-bg, #212529) !important;
+}
+
+/* Fix table-responsive inside DataTables scroll */
+.dataTables_wrapper .table-responsive {
+    overflow: visible;
+}
+
+/* Ensure proper width recalculation on sidebar toggle */
+.dataTables_wrapper {
+    width: 100% !important;
+}
+
+.dataTables_scrollHeadInner,
+.dataTables_scrollBody table {
+    width: 100% !important;
+}
+
+/* Scrollbar styling for a cleaner look */
+.dataTables_scrollBody::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+[data-bs-theme="dark"] .dataTables_scrollBody::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+[data-bs-theme="dark"] .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Fixed Columns Styling */
+.DTFC_LeftBodyLiner,
+.DTFC_RightBodyLiner {
+    background-color: var(--bs-card-bg, #fff) !important;
+}
+
+/* For DataTables 4.x FixedColumns which uses sticky classes */
+table.dataTable.table-bordered.fixedColumns {
+    border-collapse: separate !important;
+}
+
+.dataTable th.fixedColumns-left,
+.dataTable td.fixedColumns-left,
+.dataTable th.fixedColumns-right,
+.dataTable td.fixedColumns-right {
+    background-color: var(--bs-card-bg, #fff) !important;
+    z-index: 3 !important;
+}
+
+[data-bs-theme="dark"] .dataTable th.fixedColumns-left,
+[data-bs-theme="dark"] .dataTable td.fixedColumns-left,
+[data-bs-theme="dark"] .dataTable th.fixedColumns-right,
+[data-bs-theme="dark"] .dataTable td.fixedColumns-right {
+    background-color: var(--bs-card-bg, #212529) !important;
+}
+
+/* Shadow to separate fixed columns from scrollable area */
+.dataTable th.fixedColumns-left:last-child,
+.dataTable td.fixedColumns-left:nth-child(2) {
+    border-right: 1px solid var(--bs-border-color, #e9ebec) !important;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.dataTable th.fixedColumns-right,
+.dataTable td.fixedColumns-right {
+    border-left: 1px solid var(--bs-border-color, #e9ebec) !important;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
+}
