@@ -30,13 +30,6 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // Populate first/last name from full name if they are empty (for existing users)
-        if (!$user->first_name && $user->name) {
-            $parts = explode(' ', $user->name, 2);
-            $user->first_name = $parts[0] ?? '';
-            $user->last_name = $parts[1] ?? '';
-        }
-
         return view('profile.edit', [
             'user' => $user,
         ]);
@@ -49,8 +42,6 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
-
-        $data['name'] = $data['first_name'] . ' ' . $data['last_name'];
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->fileService->upload($request->file('image'), 'uploads/profile', $user->image);

@@ -39,6 +39,20 @@
                                         placeholder="Email" required>
                                     <div class="invalid-feedback">Please provide a valid email.</div>
                                 </div>
+                                <div class="col-md-6">
+                                    <label for="mobile" class="form-label">Mobile Number</label>
+                                    <input type="text" class="form-control" id="mobile" name="mobile"
+                                        placeholder="Mobile Number">
+                                    <div class="invalid-feedback">Please enter a valid mobile number.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="active" selected>Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a status.</div>
+                                </div>
                                 <div class="col-md-12">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" class="form-control" id="password" name="password"

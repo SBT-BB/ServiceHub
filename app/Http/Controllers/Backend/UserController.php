@@ -17,12 +17,6 @@ class UserController extends Controller
             $users = User::with('roles')->orderBy('created_at', 'desc');
 
             return datatables()->of($users)
-                ->editColumn('first_name', function ($user) {
-                    return $user->first_name ?? '—';
-                })
-                ->editColumn('last_name', function ($user) {
-                    return $user->last_name ?? '—';
-                })
                 ->addColumn('image', function ($user) {
                     if ($user->image) {
                         return '<img src="' . asset('storage/' . $user->image) . '" alt="Avatar" class="rounded-circle" width="35" height="35">';
@@ -61,6 +55,9 @@ class UserController extends Controller
                 // ->editColumn('postal_code', function ($user) {
                 //     return $user->postal_code ?? '—';
                 // })
+                ->editColumn('mobile', function ($user) {
+                    return $user->mobile ?? '—';
+                })
                 ->addColumn('status', function ($user) {
                     $badge = $user->status === 'active' ? 'bg-success' : 'bg-danger';
                     $label = $user->status ? ucfirst($user->status) : 'Active';
@@ -79,7 +76,7 @@ class UserController extends Controller
                         'delete_route' => route('user.destroy', $user->id)
                     ])->render();
                 })
-                ->rawColumns(['roles',  'action'])
+                ->rawColumns(['roles', 'status', 'action'])
                 ->make(true);
         }
 
@@ -97,6 +94,8 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'mobile' => 'nullable|string|max:20|unique:users,mobile',
+            'status' => 'required|in:active,inactive',
             'password' => 'required|min:6',
             'roles' => 'required|array'
         ]);
@@ -111,6 +110,8 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'mobile' => $request->mobile,
+            'status' => $request->status ?? 'active',
             'password' => Hash::make($request->password),
         ]);
 
@@ -135,6 +136,8 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'mobile' => 'nullable|string|max:20|unique:users,mobile,' . $user->id,
+            'status' => 'required|in:active,inactive',
             'password' => 'nullable|min:6',
             'roles' => 'required|array'
         ]);
@@ -149,6 +152,8 @@ class UserController extends Controller
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
+            'mobile' => $request->mobile,
+            'status' => $request->status ?? 'active',
         ]);
 
         if ($request->password) {

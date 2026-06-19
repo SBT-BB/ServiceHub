@@ -1,0 +1,501 @@
+{
+  "info": {
+    "_postman_id": "servicehub-otp-auth-v1",
+    "name": "ServiceHub — OTP Auth API",
+    "description": "Complete OTP Authentication API collection for ServiceHub Flutter App.\n\n**Flow:**\n1. Check Mobile → if exists, OTP sent\n2. Register → if new user, OTP sent\n3. Verify OTP → get Bearer Token\n4. Use Bearer Token for protected routes\n5. Logout → token revoked\n\n**Base URL Variable:** `{{base_url}}` = http://127.0.0.1:8000\n**Token Variable:** `{{token}}` — auto-set after Verify OTP",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string",
+      "description": "Laravel dev server URL. Change if hosted elsewhere."
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Bearer token — auto-filled after Verify OTP"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Check Mobile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has exists field', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json).to.have.property('exists');",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "if (json.exists) {",
+              "    console.log('✅ Mobile found — OTP sent. Go to Verify OTP.');",
+              "} else {",
+              "    console.log('❌ Mobile not found — Go to Register first.');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"mobile\": \"9876543210\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/check-mobile",
+          "host": ["{{base_url}}"],
+          "path": ["api", "check-mobile"]
+        },
+        "description": "**Step 1:** Check karo mobile number exists karta hai ya nahi.\n\n**If exists = true** → OTP bhej diya gaya, Verify OTP pe jao.\n**If exists = false** → Pehle Register karo.\n\nOTP check karne ke liye: `storage/logs/laravel.log` mein dekho."
+      },
+      "response": [
+        {
+          "name": "Mobile Exists (OTP Sent)",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobile\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/check-mobile"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n    \"exists\": true,\n    \"message\": \"OTP sent successfully\"\n}"
+        },
+        {
+          "name": "Mobile Not Found",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobile\": \"9999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/check-mobile"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n    \"exists\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "2. Register New User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('OTP sent message', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json.message).to.include('OTP');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"mobile\": \"9876543210\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/register",
+          "host": ["{{base_url}}"],
+          "path": ["api", "register"]
+        },
+        "description": "**Step 2 (Only for new users):** Naya user register karo.\n\nRequired fields:\n- `name` — Full name\n- `email` — Unique email\n- `mobile` — Unique 10-digit mobile number\n\nRegistration ke baad OTP automatically bhej diya jaata hai.\nOTP check: `storage/logs/laravel.log`"
+      },
+      "response": [
+        {
+          "name": "Registration Success",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"mobile\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register"
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "body": "{\n    \"message\": \"OTP sent to your mobile number\",\n    \"mobile\": \"9876543210\"\n}"
+        },
+        {
+          "name": "Validation Error (Duplicate Mobile)",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"mobile\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register"
+            }
+          },
+          "status": "Unprocessable Content",
+          "code": 422,
+          "body": "{\n    \"message\": \"The mobile has already been taken.\",\n    \"errors\": {\n        \"mobile\": [\"The mobile has already been taken.\"]\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "3. Verify OTP ✅ (Gets Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Token received', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json).to.have.property('token');",
+              "    pm.expect(json.token).to.not.be.empty;",
+              "});",
+              "",
+              "// Auto-save token to collection variable",
+              "var json = pm.response.json();",
+              "if (json.token) {",
+              "    pm.collectionVariables.set('token', json.token);",
+              "    console.log('✅ Token saved! You can now use protected endpoints.');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"mobile\": \"9876543210\",\n    \"otp\": \"123456\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/verify-otp",
+          "host": ["{{base_url}}"],
+          "path": ["api", "verify-otp"]
+        },
+        "description": "**Step 3:** OTP verify karo aur Bearer Token lo.\n\n⚠️ OTP `storage/logs/laravel.log` mein milega.\n\n**After success:**\n- `token` field mein Bearer token aayega\n- Token automatically `{{token}}` variable mein save ho jaata hai\n- Ab protected endpoints use kar sakte ho"
+      },
+      "response": [
+        {
+          "name": "OTP Verified — Token Received",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobile\": \"9876543210\",\n    \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/verify-otp"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n    \"token\": \"1|abcdefghijklmnopqrstuvwxyz1234567890\",\n    \"user\": {\n        \"id\": 1,\n        \"name\": \"Test User\",\n        \"email\": \"testuser@example.com\",\n        \"mobile\": \"9876543210\",\n        \"status\": \"active\"\n    }\n}"
+        },
+        {
+          "name": "Invalid OTP",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobile\": \"9876543210\",\n    \"otp\": \"000000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/verify-otp"
+            }
+          },
+          "status": "Unprocessable Content",
+          "code": 422,
+          "body": "{\n    \"message\": \"Invalid or expired OTP\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "4. Resend OTP",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "console.log('Response:', JSON.stringify(json));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"mobile\": \"9876543210\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/resend-otp",
+          "host": ["{{base_url}}"],
+          "path": ["api", "resend-otp"]
+        },
+        "description": "**OTP Resend karo** (30 second rate limit hai).\n\n30 seconds se pehle resend karne par error aayega.\nNew OTP `storage/logs/laravel.log` mein milega."
+      },
+      "response": [
+        {
+          "name": "OTP Resent",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobile\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/resend-otp"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n    \"message\": \"OTP resent successfully\"\n}"
+        },
+        {
+          "name": "Rate Limited (30s)",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobile\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/resend-otp"
+            }
+          },
+          "status": "Too Many Requests",
+          "code": 429,
+          "body": "{\n    \"message\": \"Please wait 30 seconds before requesting a new OTP\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "5. Get User Profile (Protected) 🔒",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('User data returned', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json).to.have.property('id');",
+              "    pm.expect(json).to.have.property('mobile');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/user",
+          "host": ["{{base_url}}"],
+          "path": ["api", "user"]
+        },
+        "description": "**Protected Route** — Bearer Token required.\n\nToken Verify OTP se milta hai aur `{{token}}` variable mein auto-save hota hai.\n\nYe current logged-in user ki details return karta hai."
+      },
+      "response": [
+        {
+          "name": "User Profile",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer 1|abcdefghijklmnopqrstuvwxyz1234567890"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/user"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n    \"id\": 1,\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"mobile\": \"9876543210\",\n    \"status\": \"active\",\n    \"created_at\": \"2026-06-18T19:00:00.000000Z\"\n}"
+        },
+        {
+          "name": "Unauthorized (No Token)",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/user"
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "body": "{\n    \"message\": \"Unauthenticated.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "6. Logout (Protected) 🔒",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Clear saved token after logout",
+              "pm.collectionVariables.set('token', '');",
+              "console.log('🔓 Logged out. Token cleared.');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/logout",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logout"]
+        },
+        "description": "**Logout** — Current token revoke ho jaata hai.\n\nBaad mein koi bhi protected API call fail ho jaayegi jab tak dobara login na karo.\n\n`{{token}}` variable automatically clear ho jaata hai."
+      },
+      "response": [
+        {
+          "name": "Logged Out",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer 1|abcdefghijklmnopqrstuvwxyz1234567890"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n    \"message\": \"Logged out successfully\"\n}"
+        }
+      ]
+    }
+  ]
+}

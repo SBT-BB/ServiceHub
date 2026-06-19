@@ -16,10 +16,10 @@
                     <thead class="bg-light bg-opacity-30">
                         <tr>
                             <th>ID</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Status</th>
                             <th>Roles</th>
                             <th>Action</th>
                         </tr>
@@ -40,14 +40,6 @@
                     name: 'id'
                 },
                 {
-                    data: 'first_name',
-                    name: 'first_name'
-                },
-                {
-                    data: 'last_name',
-                    name: 'last_name'
-                },
-                {
                     data: 'name',
                     name: 'name'
                 },
@@ -55,54 +47,16 @@
                     data: 'email',
                     name: 'email'
                 },
-                // {
-                //     data: 'image',
-                //     name: 'image',
-                //     orderable: false,
-                //     searchable: false
-                // },
-                // {
-                //     data: 'email_verified_at',
-                //     name: 'email_verified_at'
-                // },
-                // {
-                //     data: 'phone',
-                //     name: 'phone'
-                // },
-                // {
-                //     data: 'date_of_birth',
-                //     name: 'date_of_birth'
-                // },
-                // {
-                //     data: 'gender',
-                //     name: 'gender'
-                // },
-                // {
-                //     data: 'address',
-                //     name: 'address'
-                // },
-                // {
-                //     data: 'city',
-                //     name: 'city'
-                // },
-                // {
-                //     data: 'state',
-                //     name: 'state'
-                // },
-                // {
-                //     data: 'country',
-                //     name: 'country'
-                // },
-                // {
-                //     data: 'postal_code',
-                //     name: 'postal_code'
-                // },
-                // {
-                //     data: 'status',
-                //     name: 'status',
-                //     orderable: false,
-                //     searchable: false
-                // },
+                {
+                    data: 'mobile',
+                    name: 'mobile'
+                },
+                {
+                    data: 'status',
+                    name: 'status',
+                    orderable: false,
+                    searchable: false
+                },
                 {
                     data: 'roles',
                     name: 'roles',

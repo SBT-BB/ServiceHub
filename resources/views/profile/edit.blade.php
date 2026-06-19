@@ -106,18 +106,11 @@
                                 <div id="image_error" class="text-danger small mt-1"></div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="first_name" class="form-label">First Name</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name"
-                                    placeholder="First Name" value="{{ old('first_name', $user->first_name) }}" required>
-                                <div class="invalid-feedback">Please enter your first name.</div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="last_name" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name"
-                                    placeholder="Last Name" value="{{ old('last_name', $user->last_name) }}" required>
-                                <div class="invalid-feedback">Please enter your last name.</div>
+                            <div class="col-md-12">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                    placeholder="Full Name" value="{{ old('name', $user->name) }}" required>
+                                <div class="invalid-feedback">Please enter your full name.</div>
                             </div>
 
                             <div class="col-md-12">
