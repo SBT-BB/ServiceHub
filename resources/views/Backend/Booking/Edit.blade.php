@@ -44,6 +44,19 @@
                 <div class="invalid-feedback">Please select a status.</div>
             </div>
 
+            <div class="col-md-6">
+                <label for="edit_tracking_status" class="form-label">Tracking Status</label>
+                <select class="form-select" id="edit_tracking_status" name="tracking_status" required>
+                    <option value="pending_confirmation" {{ $booking->tracking_status === 'pending_confirmation' ? 'selected' : '' }}>Booking Confirmation Pending</option>
+                    <option value="confirmed" {{ $booking->tracking_status === 'confirmed' ? 'selected' : '' }}>Booking Confirmed</option>
+                    <option value="trip_started" {{ $booking->tracking_status === 'trip_started' ? 'selected' : '' }}>Trip Started</option>
+                    <option value="shifting_started" {{ $booking->tracking_status === 'shifting_started' ? 'selected' : '' }}>Shifting Started</option>
+                    <option value="pickup_completed" {{ $booking->tracking_status === 'pickup_completed' ? 'selected' : '' }}>Pickup Completed</option>
+                    <option value="completed" {{ $booking->tracking_status === 'completed' ? 'selected' : '' }}>Shifting Completed</option>
+                </select>
+                <div class="invalid-feedback">Please select a tracking status.</div>
+            </div>
+
             <hr class="my-3">
 
             <!-- Pickup Location Details -->

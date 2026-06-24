@@ -77,7 +77,7 @@
                     <h5 class="card-title mb-0">Tracking Progress</h5>
                 </div>
                 <div class="card-body py-4">
-                    @if ($booking->status === 'cancelled')
+                    @if ($booking->tracking_status === 'cancelled')
                         <div class="alert alert-danger d-flex align-items-center mb-0" role="alert">
                             <i class="ri-error-warning-line fs-20 me-2"></i>
                             <div>
@@ -87,20 +87,28 @@
                     @else
                         <!-- Progress Bar & Timeline -->
                         @php
-                            $statusOrder = ['pending', 'confirmed', 'in_progress', 'completed'];
-                            $currentIdx = array_search($booking->status, $statusOrder);
+                            $statusOrder = [
+                                'pending_confirmation' => 'Booking Confirmation Pending',
+                                'confirmed'            => 'Booking Confirmed',
+                                'trip_started'         => 'Trip Started',
+                                'shifting_started'     => 'Shifting Started',
+                                'pickup_completed'     => 'Pickup Completed',
+                                'completed'            => 'Shifting Completed'
+                            ];
+                            $keys = array_keys($statusOrder);
+                            $currentIdx = array_search($booking->tracking_status, $keys);
                             if ($currentIdx === false) $currentIdx = 0;
                         @endphp
                         
                         <div class="d-flex justify-content-between align-items-center position-relative mb-4" style="margin-top: 15px;">
                             <!-- Progress Line behind badges -->
                             <div class="progress position-absolute start-0 end-0" style="height: 4px; z-index: 1; top: 50%; transform: translateY(-50%);">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ ($currentIdx / (count($statusOrder) - 1)) * 100 }}%"></div>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ ($currentIdx / (count($keys) - 1)) * 100 }}%"></div>
                             </div>
                             
                             <!-- Badges -->
-                            @foreach ($statusOrder as $idx => $step)
-                                <div class="text-center position-relative" style="z-index: 2; width: 25%;">
+                            @foreach ($keys as $idx => $stepKey)
+                                <div class="text-center position-relative" style="z-index: 2; width: {{ 100 / count($keys) }}%;">
                                     <div class="avatar avatar-md rounded-circle border border-2 mx-auto mb-2 {{ $idx <= $currentIdx ? 'bg-success text-white border-success' : 'bg-white text-muted border-light' }}" style="width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;">
                                         @if ($idx < $currentIdx)
                                             <i class="ri-check-line"></i>
@@ -108,7 +116,7 @@
                                             <span>{{ $idx + 1 }}</span>
                                         @endif
                                     </div>
-                                    <span class="fs-12 fw-medium {{ $idx == $currentIdx ? 'text-success fw-semibold' : 'text-muted' }}">{{ ucfirst(str_replace('_', ' ', $step)) }}</span>
+                                    <span class="fs-12 fw-medium {{ $idx == $currentIdx ? 'text-success fw-semibold' : 'text-muted' }}">{{ $statusOrder[$stepKey] }}</span>
                                 </div>
                             @endforeach
                         </div>
