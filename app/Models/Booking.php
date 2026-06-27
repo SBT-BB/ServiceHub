@@ -21,6 +21,7 @@ class Booking extends Model
         'drop_longitude',
         'shifting_date',
         'shifting_time',
+        'floors',
         'amount',
         'status',
         
@@ -39,6 +40,10 @@ class Booking extends Model
         'floor_charges',
         'weekend_charges',
         'month_end_charges',
+        'loading_charge',
+        'unloading_charge',
+        'packing_charge',
+        'labour_charge',
         'advance_amount',
         'remaining_amount',
         'advance_payment_status',

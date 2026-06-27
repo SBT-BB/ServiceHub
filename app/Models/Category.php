@@ -15,6 +15,12 @@ class Category extends Model
         'min_score',
         'max_score',
         'base_fare',
+        'price_per_point',
+        'weekend_surcharge_percent',
+        'month_end_surcharge_percent',
+        'peak_time_surcharge_percent',
+        'peak_time_start',
+        'peak_time_end',
         'status',
     ];
 

@@ -76,8 +76,8 @@
                             <th>Booking No</th>
                             <th>Customer Name</th>
                             <th>Customer Mobile</th>
-                            <th>Pickup Location</th>
-                            <th>Drop Location</th>
+                            <!-- <th>Pickup Location</th>
+                            <th>Drop Location</th> -->
                             <th>Shifting Date</th>
                             <th>Amount</th>
                             <th>Status</th>
@@ -110,14 +110,14 @@
                     name: 'customer_mobile',
                     orderable: false
                 },
-                {
-                    data: 'pickup_location',
-                    name: 'pickup_location'
-                },
-                {
-                    data: 'drop_location',
-                    name: 'drop_location'
-                },
+                // {
+                //     data: 'pickup_location',
+                //     name: 'pickup_location'
+                // },
+                // {
+                //     data: 'drop_location',
+                //     name: 'drop_location'
+                // },
                 {
                     data: 'shifting_date',
                     name: 'shifting_date'
@@ -152,7 +152,7 @@
                 $.ajax({
                     url: $form.attr('action'),
                     method: 'POST',
-                    data: $form.serialize(),
+                    data: $form.serializeb(),
                     success: function(response) {
                         showToast(response.message || 'Status updated successfully!');
                         table.ajax.reload(null, false);

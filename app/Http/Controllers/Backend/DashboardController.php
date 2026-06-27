@@ -14,8 +14,8 @@ class DashboardController extends Controller
         if (in_array($page, $allowedPages) && view()->exists($page)) {
             // Fetch Dynamic Stats
             $stats = [
-                'total_customers'   => \App\Models\User::role('User')->count(),
-                'active_customers'  => \App\Models\User::role('User')->where('status', 'active')->count(),
+                'total_customers'   => \App\Models\User::role('Customer')->count(),
+                'active_customers'  => \App\Models\User::role('Customer')->where('status', 'active')->count(),
                 'total_bookings'    => \App\Models\Booking::count(),
                 'completed_bookings'=> \App\Models\Booking::where('status', 'completed')->count(),
                 'pending_bookings'  => \App\Models\Booking::where('status', 'pending')->count(),

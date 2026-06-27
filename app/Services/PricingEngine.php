@@ -45,11 +45,16 @@ class PricingEngine
             'vehicle_id'        => null,
             'vehicle_name'      => null,
             'base_fare'         => 0,
+            'price_per_point'   => 0,
+            'pricing_formula'   => 'Base fare only',
             'distance_charges'  => 0,
             'addon_charges'     => 0,
             'floor_charges'     => 0,
             'weekend_charges'   => 0,
             'month_end_charges' => 0,
+            'peak_time_charges' => 0,
+            'advance_percentage'=> 0,
+            'advance_amount'    => 0,
             'total_amount'      => 0,
             'total_distance_km' => 0,
             'items_breakdown'   => [],
@@ -102,7 +107,19 @@ class PricingEngine
         if ($category) {
             $breakdown['category_id']   = $category->id;
             $breakdown['category_name'] = $category->category_name;
-            $breakdown['base_fare']     = (float) $category->base_fare;
+            $baseFare = (float) $category->base_fare;
+            $pricePerPoint = (float) ($category->price_per_point ?? 0);
+            $breakdown['price_per_point'] = $pricePerPoint;
+            $pointBasedFare = $pricePerPoint > 0 ? ($breakdown['total_volume_score'] * $pricePerPoint) : 0;
+            $breakdown['base_fare'] = $baseFare + $pointBasedFare;
+            $breakdown['pricing_formula'] = $pricePerPoint > 0
+                ? 'Base fare + (volume points × ₹' . number_format($pricePerPoint, 2) . ')'
+                : 'Base fare only';
+            $breakdown['category_weekend_surcharge_percent'] = (float) ($category->weekend_surcharge_percent ?? 0);
+            $breakdown['category_month_end_surcharge_percent'] = (float) ($category->month_end_surcharge_percent ?? 0);
+            $breakdown['category_peak_time_surcharge_percent'] = (float) ($category->peak_time_surcharge_percent ?? 0);
+            $breakdown['category_peak_time_start'] = $category->peak_time_start;
+            $breakdown['category_peak_time_end'] = $category->peak_time_end;
 
             if ($category->vehicle_id) {
                 $vehicle = Vehicle::find($category->vehicle_id);
@@ -153,13 +170,15 @@ class PricingEngine
             $breakdown['floor_charges'] = (int)$data['floors'] * $perFloorCharge;
         }
 
-        // ── Step 7: Date-Based Surge Charges ─────────────────────────────────
+        // ── Step 7: Date- and Time-Based Surge Charges ─────────────────────
         if (!empty($data['shifting_date'])) {
             $date = Carbon::parse($data['shifting_date']);
 
             // Weekend surcharge (Saturday / Sunday)
             if ($date->isWeekend()) {
-                $weekendSurge = $this->getSettingValue('weekend_surge_percentage', 10);
+                $weekendSurge = $breakdown['category_weekend_surcharge_percent'] > 0
+                    ? $breakdown['category_weekend_surcharge_percent']
+                    : $this->getSettingValue('weekend_surge_percentage', 10);
                 $breakdown['weekend_charges'] = round(
                     ($breakdown['base_fare'] + $breakdown['distance_charges']) * ($weekendSurge / 100),
                     2
@@ -169,9 +188,29 @@ class PricingEngine
             // Month-end surcharge (last 3 days or first 2 days of month)
             $daysInMonth = $date->daysInMonth;
             if ($date->day >= ($daysInMonth - 2) || $date->day <= 2) {
-                $monthEndSurge = $this->getSettingValue('month_end_surge_percentage', 15);
+                $monthEndSurge = $breakdown['category_month_end_surcharge_percent'] > 0
+                    ? $breakdown['category_month_end_surcharge_percent']
+                    : $this->getSettingValue('month_end_surge_percentage', 15);
                 $breakdown['month_end_charges'] = round(
                     ($breakdown['base_fare'] + $breakdown['distance_charges']) * ($monthEndSurge / 100),
+                    2
+                );
+            }
+        }
+
+        if (!empty($data['shifting_time'])) {
+            $time = $data['shifting_time'];
+            $start = $breakdown['category_peak_time_start'] ? $breakdown['category_peak_time_start'] : $this->getSettingValue('peak_time_start', '20:00');
+            $end   = $breakdown['category_peak_time_end'] ? $breakdown['category_peak_time_end'] : $this->getSettingValue('peak_time_end', '23:00');
+            $categoryPeakPercent = (float) ($breakdown['category_peak_time_surcharge_percent'] ?? 0);
+            $peakEnabled = $categoryPeakPercent > 0 || $this->getSettingValue('peak_time_surge_percentage', 0) > 0;
+
+            if ($peakEnabled && $this->isTimeBetween($time, $start, $end)) {
+                $peakSurge = $categoryPeakPercent > 0
+                    ? $categoryPeakPercent
+                    : $this->getSettingValue('peak_time_surge_percentage', 10);
+                $breakdown['peak_time_charges'] = round(
+                    ($breakdown['base_fare'] + $breakdown['distance_charges']) * ($peakSurge / 100),
                     2
                 );
             }
@@ -184,9 +223,14 @@ class PricingEngine
             + $breakdown['addon_charges']
             + $breakdown['floor_charges']
             + $breakdown['weekend_charges']
-            + $breakdown['month_end_charges'],
+            + $breakdown['month_end_charges']
+            + $breakdown['peak_time_charges'],
             2
         );
+
+        $advancePercentage = $this->getSettingValue('advance_payment_percentage', 20);
+        $breakdown['advance_percentage'] = $advancePercentage;
+        $breakdown['advance_amount'] = round($breakdown['total_amount'] * ($advancePercentage / 100), 2);
 
         return $breakdown;
     }
@@ -218,11 +262,37 @@ class PricingEngine
     /**
      * Helper: safely fetch a pricing setting value.
      */
-    private function getSettingValue(string $key, float $default): float
+    private function getSettingValue(string $key, float|string $default): float|string
     {
         $setting = PricingSetting::where('key', $key)
             ->where('is_enabled', 1)
             ->first();
-        return $setting ? (float) $setting->value : $default;
+
+        if (!$setting) {
+            return $default;
+        }
+
+        if (is_numeric($setting->value)) {
+            return (float) $setting->value;
+        }
+
+        return (string) $setting->value;
+    }
+
+    private function isTimeBetween(string $time, string $start, string $end): bool
+    {
+        $timeValue = strtotime($time);
+        $startValue = strtotime($start);
+        $endValue = strtotime($end);
+
+        if ($startValue === false || $endValue === false || $timeValue === false) {
+            return false;
+        }
+
+        if ($startValue <= $endValue) {
+            return $timeValue >= $startValue && $timeValue <= $endValue;
+        }
+
+        return $timeValue >= $startValue || $timeValue <= $endValue;
     }
 }

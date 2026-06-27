@@ -5,8 +5,8 @@
 @section('pagetitle', 'Bookings')
 
 @section('content')
-<div class="row g-4">
-
+<div class="row g-4 booking-modern-shell">
+<!-- 
     {{-- Breadcrumb --}}
     <div class="col-12">
         <nav aria-label="breadcrumb" class="mb-1">
@@ -15,10 +15,59 @@
                 <li class="breadcrumb-item active">New Booking</li>
             </ol>
         </nav>
-    </div>
+    </div> -->
 
-    <form id="createBookingForm" action="{{ route('booking.store') }}" method="POST" novalidate>
+    <form id="createBookingForm" action="{{ route('booking.store') }}" method="POST" novalidate class="w-100">
     @csrf
+
+    <div class="col-12">
+        <div class="row g-3">
+
+    <!-- <div class="col-12">
+        <div class="card border-0 shadow-sm hero-card text-white">
+            <div class="card-body py-4">
+                <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-semibold">New Booking</span>
+                            <span class="badge bg-white bg-opacity-20 px-3 py-2 rounded-pill">Fast & Simple</span>
+                        </div>
+                        <h4 class="mb-1 fw-bold">Create a smooth shifting request in minutes</h4>
+                        <p class="mb-0 small opacity-90">Complete the booking step-by-step with a cleaner and more modern flow.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge bg-white text-primary px-3 py-2 rounded-pill">1. Customer</span>
+                        <span class="badge bg-white text-primary px-3 py-2 rounded-pill">2. Locations</span>
+                        <span class="badge bg-white text-primary px-3 py-2 rounded-pill">3. Items</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="col-12">
+        <div class="card border-0 shadow-sm tab-nav-card">
+            <div class="card-body p-2">
+                <ul class="nav nav-pills nav-fill gap-2 booking-tabs" role="tablist">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link active" data-tab="customer-tab"><i class="ri-user-line me-1"></i>Customer</button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" data-tab="location-tab"><i class="ri-map-pin-line me-1"></i>Locations</button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" data-tab="items-tab"><i class="ri-box-3-line me-1"></i>Items</button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" data-tab="addons-tab"><i class="ri-service-line me-1"></i>Add-ons</button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" data-tab="charges-tab"><i class="ri-money-rupee-circle-line me-1"></i>Charges</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     {{-- ══════════════════════════════════════════════════════
          LEFT COLUMN — Form Inputs
@@ -26,16 +75,21 @@
     <div class="col-xl-8">
 
         {{-- ── A: Customer & Schedule ── --}}
-        <div class="card mb-4">
-            <div class="card-header d-flex align-items-center gap-2">
+        <div class="card mb-3 border-0 shadow-sm tab-panel modern-card" id="customer-tab">
+            <div class="card-header d-flex align-items-center gap-2 bg-white border-0 py-3">
                 <span class="badge bg-primary rounded-circle p-2"><i class="ri-user-line fs-14"></i></span>
                 <h6 class="card-title mb-0">Customer & Schedule</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body pt-0">
                 <div class="row g-3">
                     <div class="col-12">
                         <label for="customer_search" class="form-label fw-semibold">Customer <span class="text-danger">*</span></label>
-                        <select class="form-select select2-ajax" id="customer_search" name="customer_id" required></select>
+                        <select class="form-control" id="customer_search" name="customer_id" required>
+                            <option value="">-- Select Customer --</option>
+                            @foreach($customers as $customer)
+                                <option value="{{ $customer->id }}">{{ $customer->name }} ({{ $customer->mobile ?? 'No Mobile' }})</option>
+                            @endforeach
+                        </select>
                         <div class="invalid-feedback">Please select a customer.</div>
                     </div>
                     <div class="col-md-4">
@@ -61,12 +115,12 @@
         </div>
 
         {{-- ── B: Locations ── --}}
-        <div class="card mb-4">
-            <div class="card-header d-flex align-items-center gap-2">
+        <div class="card mb-3 border-0 shadow-sm tab-panel modern-card d-none" id="location-tab">
+            <div class="card-header d-flex align-items-center gap-2 bg-white border-0 py-3">
                 <span class="badge bg-success rounded-circle p-2"><i class="ri-map-pin-line fs-14"></i></span>
-                <h6 class="card-title mb-0">Pickup & Drop Locations</h6>
+                <h6 class="card-title mb-0">Pickup & Drop</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body pt-0">
                 <div class="row g-3">
                     {{-- Pickup --}}
                     <div class="col-12">
@@ -124,21 +178,21 @@
         </div>
 
         {{-- ── C: Item Selector ── --}}
-        <div class="card mb-4">
-            <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="card mb-3 tab-panel modern-card d-none" id="items-tab">
+            <div class="card-header d-flex align-items-center justify-content-between py-3">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-warning rounded-circle p-2"><i class="ri-box-3-line fs-14"></i></span>
                     <h6 class="card-title mb-0">Select Items to Shift</h6>
                 </div>
-                <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex gap-2 align-items-center fs-12 text-muted">
-                        <span class="badge bg-info-subtle text-info border">Small = 1 pt</span>
-                        <span class="badge bg-warning-subtle text-warning border">Medium = 3 pts</span>
-                        <span class="badge bg-danger-subtle text-danger border">Large = 5 pts</span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="d-flex gap-1 align-items-center fs-11 text-muted">
+                        <span class="badge bg-info-subtle text-info border">S=1</span>
+                        <span class="badge bg-warning-subtle text-warning border">M=3</span>
+                        <span class="badge bg-danger-subtle text-danger border">L=5</span>
                     </div>
                     <div class="text-end">
-                        <span class="fw-bold text-dark">Score: </span>
-                        <span id="totalScoreDisplay" class="badge bg-primary fs-13 px-3">0</span>
+                        <span class="fw-bold text-dark fs-12">Score:</span>
+                        <span id="totalScoreDisplay" class="badge bg-primary fs-12 px-2">0</span>
                     </div>
                 </div>
             </div>
@@ -174,8 +228,8 @@
         </div>
 
         {{-- ── D: Add-On Services ── --}}
-        <div class="card mb-4">
-            <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="card mb-3 border-0 shadow-sm modern-card tab-panel d-none" id="addons-tab">
+            <div class="card-header d-flex align-items-center justify-content-between bg-white border-0 py-3">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-info rounded-circle p-2"><i class="ri-service-line fs-14"></i></span>
                     <h6 class="card-title mb-0">Add-On Services</h6>
@@ -216,78 +270,169 @@
             </div>
         </div>
 
+        {{-- ── E: Extra Charges ── --}}
+        <div class="card mb-3 border-0 shadow-sm modern-card tab-panel d-none" id="charges-tab">
+            <div class="card-header d-flex align-items-center gap-2 bg-white border-0 py-3">
+                <span class="badge bg-danger rounded-circle p-2"><i class="ri-money-rupee-circle-line fs-14"></i></span>
+                <h6 class="card-title mb-0">Extra Charges</h6>
+                <span class="ms-auto badge bg-danger-subtle text-danger fs-11">Optional — Manually entered</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <div class="col-12">
+                        <div class="alert alert-info border-0 py-2 px-3 fs-12 mb-0 rounded-3">
+                            <i class="ri-information-line me-1"></i>
+                            This Charges <strong>are not calculated automatically.</strong> Please enter them manually, and they will be included in the total amount.
+                        </div>
+                    </div>
+
+                    {{-- Loading Charge --}}
+                    <div class="col-md-6">
+                        <label for="loading_charge" class="form-label fw-semibold">
+                            <i class="ri-upload-2-line me-1 text-primary"></i>Loading Charge
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control extra-charge-input" id="loading_charge"
+                                name="loading_charge" min="0" step="0.01" value="0"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    {{-- Unloading Charge --}}
+                    <div class="col-md-6">
+                        <label for="unloading_charge" class="form-label fw-semibold">
+                            <i class="ri-download-2-line me-1 text-success"></i>Unloading Charge
+                            <!--  -->
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control extra-charge-input" id="unloading_charge"
+                                name="unloading_charge" min="0" step="0.01" value="0"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    {{-- Packing Charge --}}
+                    <div class="col-md-6">
+                        <label for="packing_charge" class="form-label fw-semibold">
+                            <i class="ri-box-1-line me-1 text-warning"></i>Packing Charge
+                            <!--  -->
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control extra-charge-input" id="packing_charge"
+                                name="packing_charge" min="0" step="0.01" value="0"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    {{-- Labour Charge --}}
+                    <div class="col-md-6">
+                        <label for="labour_charge" class="form-label fw-semibold">
+                            <i class="ri-group-line me-1 text-info"></i>Labour Charge
+                            <!--  -->
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control extra-charge-input" id="labour_charge"
+                                name="labour_charge" min="0" step="0.01" value="0"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    {{-- Live Extra Charges Summary --}}
+                    <div class="col-12">
+                        <div class="rounded-3 p-3 border" style="background:#f8fafc;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fs-13 fw-semibold text-dark"><i class="ri-calculator-line me-1"></i>Extra Charges Total</span>
+                                <span class="fs-14 fw-bold text-danger" id="extraChargesTotalDisplay">₹0</span>
+                            </div>
+                            <div class="fs-12 text-muted mt-1">This amount will be added to the system-calculated price</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 
     {{-- ══════════════════════════════════════════════════════
          RIGHT COLUMN — Live Pricing Panel
     ══════════════════════════════════════════════════════ --}}
     <div class="col-xl-4">
-        <div class="card sticky-top" style="top:80px;">
-            <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+        <div class="card sticky-top border-0 shadow-sm modern-sidebar" style="top:80px;">
+            <div class="card-header bg-primary text-white d-flex align-items-center gap-2 py-3">
                 <i class="ri-price-tag-3-line fs-18"></i>
                 <h6 class="card-title mb-0 text-white">Live Price Calculator</h6>
             </div>
             <div class="card-body p-3">
 
-                {{-- Volume Score Bar --}}
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1">
+                <div class="pricing-mini-card mb-2 p-2 rounded">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
                         <span class="fs-12 text-muted">Volume Score</span>
-                        <span class="fs-12 fw-bold" id="scoreLabel">0 / 310 pts</span>
+                        <span class="fs-12 fw-bold text-primary" id="scoreLabel">0 / 310 pts</span>
                     </div>
-                    <div class="progress" style="height:8px;">
+                    <div class="progress rounded-pill" style="height:8px;">
                         <div class="progress-bar bg-primary" id="scoreBar" role="progressbar" style="width:0%"></div>
                     </div>
                 </div>
 
-                {{-- Category Detected --}}
-                <div class="mb-3 p-3 bg-light rounded">
-                    <div class="fs-12 text-muted mb-1">Auto-Detected Category</div>
+                <div class="pricing-mini-card mb-2 p-2 rounded">
+                    <div class="fs-12 text-muted mb-1">Category</div>
                     <div id="categoryDetected" class="fw-bold text-primary fs-14">—</div>
                     <div class="fs-12 text-muted mt-1"><i class="ri-truck-line me-1"></i><span id="vehicleDetected">No vehicle assigned</span></div>
                 </div>
 
-                {{-- Survey Required Alert --}}
-                <div id="surveyAlert" class="alert alert-danger d-none p-2 fs-12" role="alert">
+                <div id="surveyAlert" class="alert alert-danger d-none p-2 fs-12 mb-2" role="alert">
                     <i class="ri-error-warning-line me-1"></i>
-                    <strong>Survey Required!</strong><br>
-                    Volume is too large for auto-quote. A Bhanderi Packers representative will conduct a free physical survey.
+                    <strong>Survey Required!</strong> Volume is too large for auto-quote.
                 </div>
 
-                <hr class="my-2">
-
-                {{-- Price Breakdown --}}
-                <div id="pricePanel">
+                <div id="pricePanel" class="small pricing-mini-card p-2 rounded">
                     <div class="d-flex justify-content-between py-1 border-bottom">
                         <span class="fs-13 text-muted">Base Fare</span>
                         <span class="fs-13 fw-semibold" id="baseFareVal">₹0</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 border-bottom">
-                        <span class="fs-13 text-muted">Distance Charges</span>
+                        <span class="fs-13 text-muted">Distance</span>
                         <span class="fs-13 fw-semibold" id="distanceVal">₹0</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 border-bottom">
-                        <span class="fs-13 text-muted">Add-On Services</span>
+                        <span class="fs-13 text-muted">Add-ons</span>
                         <span class="fs-13 fw-semibold" id="addonVal">₹0</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 border-bottom">
-                        <span class="fs-13 text-muted">Floor Charges</span>
+                        <span class="fs-13 text-muted">Floor</span>
                         <span class="fs-13 fw-semibold" id="floorVal">₹0</span>
                     </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom" id="extraChargesRow" style="display:none!important;">
+                        <span class="fs-13 text-danger">Extra Charges</span>
+                        <span class="fs-13 fw-semibold text-danger" id="extraChargesVal">₹0</span>
+                    </div>
+                    <div class="text-muted fs-12 mt-2 mb-2" id="pricingHintBox">
+                        <div><i class="ri-information-line me-1"></i> Charges update instantly as you fill the form.</div>
+                    </div>
                     <div class="d-flex justify-content-between py-1 border-bottom" id="weekendRow" style="display:none!important;">
-                        <span class="fs-13 text-warning">Weekend Surcharge</span>
+                        <span class="fs-13 text-warning">Weekend</span>
                         <span class="fs-13 fw-semibold text-warning" id="weekendVal">₹0</span>
                     </div>
                     <div class="d-flex justify-content-between py-1 border-bottom" id="monthEndRow" style="display:none!important;">
-                        <span class="fs-13 text-warning">Month-End Surcharge</span>
-                        <span class="fs-13 fw-semibold text-warning" id="monthEndVal">₹0</span>
+                        <span class="fs-13 text-danger">Month-End</span>
+                        <span class="fs-13 fw-semibold text-danger" id="monthEndVal">₹0</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom" id="peakTimeRow" style="display:none!important;">
+                        <span class="fs-13 text-info">Peak-Time</span>
+                        <span class="fs-13 fw-semibold text-info" id="peakTimeVal">₹0</span>
                     </div>
                     <div class="d-flex justify-content-between py-2 mt-1">
-                        <span class="fs-15 fw-bold">Total Amount</span>
-                        <span class="fs-16 fw-bold text-primary" id="totalAmountVal">₹0</span>
+                        <span class="fs-14 fw-bold">Total</span>
+                        <span class="fs-15 fw-bold text-primary" id="totalAmountVal">₹0</span>
                     </div>
                     <div class="d-flex justify-content-between text-muted">
-                        <span class="fs-12">Advance (20%)</span>
+                        <span class="fs-12">Advance</span>
                         <span class="fs-12" id="advanceVal">₹0</span>
                     </div>
                     <div class="d-flex justify-content-between text-muted">
@@ -296,8 +441,7 @@
                     </div>
                 </div>
 
-                {{-- Calculate Button --}}
-                <button type="button" id="calcPriceBtn" class="btn btn-primary w-100 mt-3">
+                <button type="button" id="calcPriceBtn" class="btn btn-primary w-100 mt-2 btn-sm">
                     <i class="ri-refresh-line me-1"></i> Calculate Price
                 </button>
                 <div id="calcSpinner" class="text-center mt-2 d-none">
@@ -305,9 +449,8 @@
                     <span class="fs-12 ms-1">Calculating...</span>
                 </div>
 
-                <hr class="my-3">
+                <hr class="my-2">
 
-                {{-- Submit Button --}}
                 <button type="submit" id="submitBookingBtn" class="btn btn-success w-100 btn-lg">
                     <i class="ri-save-line me-1"></i> Save Booking
                 </button>
@@ -317,25 +460,93 @@
         </div>
     </div>
 
+    </div>
+    </div>
+    </div>
+
     </form>
 </div>
 @endsection
 
 @section('js')
 <style>
-    .item-card { transition: all 0.2s ease; cursor: default; }
+    .item-card { transition: all 0.2s ease; cursor: default; padding: 0.6rem; }
     .item-card.has-qty { background: #f0f7ff; border-color: #0d6efd !important; }
-    .addon-card { transition: all 0.2s ease; cursor: pointer; }
+    .addon-card { transition: all 0.2s ease; cursor: pointer; padding: 0.7rem 0.8rem; }
     .addon-card.selected { background: #f0fff4; border-color: #198754 !important; }
+    .card-header { padding-bottom: 0.6rem; }
+    .form-label { margin-bottom: 0.35rem; font-size: 0.9rem; }
+    .form-control, .form-select { font-size: 0.92rem; }
+    .hero-card {
+        background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+        border-radius: 20px;
+    }
+    .tab-nav-card, .modern-card, .modern-sidebar {
+        border-radius: 18px;
+    }
+    .booking-tabs .nav-link {
+        border-radius: 999px;
+        color: #475569;
+        font-weight: 600;
+        padding: 0.65rem 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .booking-tabs .nav-link.active {
+        background: #2563eb;
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+    }
+    .modern-card .card-header {
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .modern-sidebar .card-header {
+        border-radius: 18px 18px 0 0;
+    }
+    .pricing-mini-card {
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+    }
+    .booking-tabs .nav-link {
+        border-radius: 999px;
+        color: #475569;
+        font-weight: 600;
+        padding: 0.6rem 0.9rem;
+    }
+    .booking-tabs .nav-link.active {
+        background: #2563eb;
+        color: #fff;
+    }
 </style>
 <script>
 $(document).ready(function () {
 
     // ── Init ─────────────────────────────────────────────────────────────
     var today = new Date().toISOString().split('T')[0];
+    var pricingConfig = {
+        perKmRate: {{ $pricingConfig['per_km_rate'] }},
+        perFloorCharge: {{ $pricingConfig['per_floor_charge'] }},
+        weekendPercent: {{ $pricingConfig['weekend_surge_percentage'] }},
+        monthEndPercent: {{ $pricingConfig['month_end_surge_percentage'] }},
+        peakPercent: {{ $pricingConfig['peak_time_surge_percentage'] }},
+        peakStart: '{{ $pricingConfig['peak_time_start'] }}',
+        peakEnd: '{{ $pricingConfig['peak_time_end'] }}',
+        advancePercent: {{ $pricingConfig['advance_payment_percentage'] }}
+    };
+
     $('#shifting_date').attr('min', today);
 
-    initSelect2Ajax('#customer_search', '{{ route('booking.search-customers') }}', 'Search by Name, Mobile or Email...');
+    $('#customer_search').select2({
+        width: '100%',
+        placeholder: 'Search by name, mobile or email',
+        allowClear: true
+    });
+
+    $('.booking-tabs .nav-link').on('click', function () {
+        $('.booking-tabs .nav-link').removeClass('active');
+        $(this).addClass('active');
+        $('.tab-panel').addClass('d-none');
+        $('#' + $(this).data('tab')).removeClass('d-none');
+    });
 
     // ── Volume Score Tracker ─────────────────────────────────────────────
     var itemQtys = {};   // { itemId: qty }
@@ -434,6 +645,7 @@ $(document).ready(function () {
             drop_latitude:     $('#drop_latitude').val()    || null,
             drop_longitude:    $('#drop_longitude').val()   || null,
             shifting_date:     $('#shifting_date').val()    || null,
+            shifting_time:     $('#shifting_time').val()    || null,
             floors:            parseInt($('#floors').val()) || 0,
             _token:            '{{ csrf_token() }}'
         };
@@ -472,8 +684,20 @@ $(document).ready(function () {
                 $('#distanceVal').text(fmt(data.distance_charges));
                 $('#addonVal').text(fmt(data.addon_charges));
                 $('#floorVal').text(fmt(data.floor_charges));
+
+                $('#baseFareRule').text(fmt(data.base_fare) + ' (category)');
+                $('#pointRateRule').text(data.price_per_point > 0 ? '₹' + parseFloat(data.price_per_point).toLocaleString('en-IN') + '/point' : 'Not set');
+                $('#distanceRule').text('₹' + parseFloat(pricingConfig.perKmRate).toLocaleString('en-IN') + '/km');
+                $('#floorRule').text('₹' + parseFloat(pricingConfig.perFloorCharge).toLocaleString('en-IN') + '/floor');
+                $('#weekendRule').text(parseFloat(pricingConfig.weekendPercent).toLocaleString('en-IN') + '%');
+                $('#monthEndRule').text(parseFloat(pricingConfig.monthEndPercent).toLocaleString('en-IN') + '%');
+                $('#peakRule').text(parseFloat(pricingConfig.peakPercent).toLocaleString('en-IN') + '% (' + pricingConfig.peakStart + '-' + pricingConfig.peakEnd + ')');
+                $('#advanceRule').text(parseFloat(pricingConfig.advancePercent).toLocaleString('en-IN') + '%');
+
+                var pricingHint = 'Base fare comes from the selected category, and point-based pricing adds ' + (data.price_per_point > 0 ? 'volume points × ₹' + parseFloat(data.price_per_point).toLocaleString('en-IN') + ' per point' : 'no extra point rate') + '. Floor charge adds ' + (data.floor_charges ? 'based on entered floors' : 'when floors are entered') + '.';
+                $('#pricingHintBox').html('<div><i class="ri-information-line me-1"></i>' + pricingHint + '</div>');
                 $('#totalAmountVal').text(fmt(data.total_amount));
-                $('#advanceVal').text(fmt(data.total_amount * 0.20));
+                $('#advanceVal').text(fmt(data.advance_amount ?? (data.total_amount * 0.20)));
                 $('#distanceKmVal').text((data.total_distance_km || 0) + ' km');
 
                 if (data.weekend_charges > 0) {
@@ -485,6 +709,14 @@ $(document).ready(function () {
                     $('#monthEndVal').text(fmt(data.month_end_charges));
                     $('#monthEndRow').show();
                 } else { $('#monthEndRow').hide(); }
+
+                if (data.peak_time_charges > 0) {
+                    $('#peakTimeVal').text(fmt(data.peak_time_charges));
+                    $('#peakTimeRow').show();
+                } else { $('#peakTimeRow').hide(); }
+
+                // Add extra manual charges to displayed total
+                updateExtraChargesDisplay(data.total_amount);
             },
             error: function () {
                 toastr.error('Could not calculate pricing. Please check the form fields.');
@@ -494,6 +726,45 @@ $(document).ready(function () {
                 $('#calcPriceBtn').prop('disabled', false);
             }
         });
+    });
+
+    // ── Extra Charges Live Calculation ───────────────────────────────────
+    var lastSystemTotal = 0;  // stores the last AJAX-fetched system total
+
+    function getExtraChargesTotal() {
+        var total = 0;
+        $('.extra-charge-input').each(function () {
+            total += parseFloat($(this).val()) || 0;
+        });
+        return total;
+    }
+
+    function updateExtraChargesDisplay(systemTotal) {
+        if (systemTotal !== undefined) lastSystemTotal = systemTotal;
+        var extra     = getExtraChargesTotal();
+        var grandTotal = lastSystemTotal + extra;
+
+        // Update the summary inside Charges tab
+        $('#extraChargesTotalDisplay').text(fmt(extra));
+
+        // Update sidebar extra charges row
+        if (extra > 0) {
+            $('#extraChargesVal').text(fmt(extra));
+            $('#extraChargesRow').show();
+        } else {
+            $('#extraChargesRow').hide();
+        }
+
+        // Update grand total in sidebar (only if system total has been fetched)
+        if (lastSystemTotal > 0 || extra > 0) {
+            $('#totalAmountVal').text(fmt(grandTotal));
+            var advPct = {{ $pricingConfig['advance_payment_percentage'] }};
+            $('#advanceVal').text(fmt(grandTotal * advPct / 100));
+        }
+    }
+
+    $(document).on('input change', '.extra-charge-input', function () {
+        updateExtraChargesDisplay();
     });
 
     // ── Auto-calculate on date / floor change ────────────────────────────

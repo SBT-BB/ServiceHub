@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\PricingSetting;
 use App\Models\User;
 use App\Services\PricingEngine;
 use Illuminate\Http\Request;
@@ -51,7 +52,7 @@ class BookingController extends Controller
                 })
                 ->addColumn('action', function ($booking) {
                     $showBtn = '<a href="' . route('booking.show', $booking->id) . '" class="btn icon-btn-sm btn-light-info" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="View Details"><i class="ri-eye-line"></i></a>';
-                    $editBtn = '<a href="' . route('booking.edit', $booking->id) . '" class="btn icon-btn-sm btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit" data-drawer="true" data-drawer-title="Edit Booking"><i class="ri-pencil-line"></i></a>';
+                    $editBtn = '<a href="' . route('booking.edit', $booking->id) . '" class="btn icon-btn-sm btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit"><i class="ri-pencil-line"></i></a>';
 
                     $actions = '<div class="hstack gap-2 fs-15">' . $showBtn . $editBtn;
 
@@ -101,7 +102,32 @@ class BookingController extends Controller
                 $query->where('status', 'active');
             }])->get();
         $addons = \App\Models\AddOn::where('status', 'active')->get();
-        return view('Backend.Booking.Create', compact('itemSizes', 'addons'));
+
+        $pricingSettings = PricingSetting::whereIn('key', [
+            'per_km_rate',
+            'per_floor_charge',
+            'weekend_surge_percentage',
+            'month_end_surge_percentage',
+            'peak_time_surge_percentage',
+            'peak_time_start',
+            'peak_time_end',
+            'advance_payment_percentage',
+        ])->get()->keyBy('key');
+
+        $pricingConfig = [
+            'per_km_rate' => (float) ($pricingSettings->get('per_km_rate')->value ?? 20),
+            'per_floor_charge' => (float) ($pricingSettings->get('per_floor_charge')->value ?? 150),
+            'weekend_surge_percentage' => (float) ($pricingSettings->get('weekend_surge_percentage')->value ?? 10),
+            'month_end_surge_percentage' => (float) ($pricingSettings->get('month_end_surge_percentage')->value ?? 15),
+            'peak_time_surge_percentage' => (float) ($pricingSettings->get('peak_time_surge_percentage')->value ?? 0),
+            'peak_time_start' => $pricingSettings->get('peak_time_start')->value ?? '20:00',
+            'peak_time_end' => $pricingSettings->get('peak_time_end')->value ?? '23:00',
+            'advance_payment_percentage' => (float) ($pricingSettings->get('advance_payment_percentage')->value ?? 20),
+        ];
+
+        $customers = User::role('Customer')->orderBy('name')->get();
+
+        return view('Backend.Booking.Create', compact('itemSizes', 'addons', 'pricingConfig', 'customers'));
     }
 
     /**
@@ -110,22 +136,30 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'customer_id'      => 'required|exists:users,id',
-            'pickup_location'  => 'required|string|max:500',
-            'drop_location'    => 'required|string|max:500',
-            'pickup_latitude'  => 'nullable|numeric',
-            'pickup_longitude' => 'nullable|numeric',
-            'drop_latitude'    => 'nullable|numeric',
-            'drop_longitude'   => 'nullable|numeric',
-            'shifting_date'    => 'required|date',
-            'shifting_time'    => 'required',
-            'status'           => 'required|in:pending,confirmed,in_progress,completed,cancelled',
-            'items'            => 'nullable|array',
-            'items.*.id'       => 'exists:items,id',
-            'items.*.quantity' => 'integer|min:1|max:50',
-            'addons'           => 'nullable|array',
-            'addons.*'         => 'exists:add_ons,id',
-            'floors'           => 'nullable|integer|min:0|max:20',
+            'customer_id'           => 'required|exists:users,id',
+            'pickup_location'       => 'required|string|max:500',
+            'drop_location'         => 'required|string|max:500',
+            'pickup_latitude'       => 'nullable|numeric',
+            'pickup_longitude'      => 'nullable|numeric',
+            'drop_latitude'         => 'nullable|numeric',
+            'drop_longitude'        => 'nullable|numeric',
+            'pickup_contact_name'   => 'nullable|string|max:255',
+            'pickup_contact_mobile' => 'nullable|string|max:20',
+            'drop_contact_name'     => 'nullable|string|max:255',
+            'drop_contact_mobile'   => 'nullable|string|max:20',
+            'shifting_date'         => 'required|date',
+            'shifting_time'         => 'required',
+            'status'                => 'required|in:pending,confirmed,in_progress,completed,cancelled',
+            'items'                 => 'nullable|array',
+            'items.*.id'            => 'exists:items,id',
+            'items.*.quantity'      => 'integer|min:1|max:50',
+            'addons'                => 'nullable|array',
+            'addons.*'              => 'exists:add_ons,id',
+            'floors'                => 'nullable|integer|min:0|max:20',
+            'loading_charge'        => 'nullable|numeric|min:0',
+            'unloading_charge'      => 'nullable|numeric|min:0',
+            'packing_charge'        => 'nullable|numeric|min:0',
+            'labour_charge'         => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -134,6 +168,12 @@ class BookingController extends Controller
             }
             return back()->withErrors($validator)->withInput();
         }
+
+        // Collect extra manual charges
+        $loadingCharge   = (float) $request->input('loading_charge',   0);
+        $unloadingCharge = (float) $request->input('unloading_charge', 0);
+        $packingCharge   = (float) $request->input('packing_charge',   0);
+        $labourCharge    = (float) $request->input('labour_charge',    0);
 
         // Run PricingEngine
         $engine = new PricingEngine();
@@ -160,8 +200,10 @@ class BookingController extends Controller
         }
 
         $vendorCommissionPct    = 15;
-        $vendorCommissionAmount = round($quote['total_amount'] * ($vendorCommissionPct / 100), 2);
-        $advanceAmount          = round($quote['total_amount'] * 0.20, 2);
+        $extraChargesTotal      = $loadingCharge + $unloadingCharge + $packingCharge + $labourCharge;
+        $grandTotal             = $quote['total_amount'] + $extraChargesTotal;
+        $vendorCommissionAmount = round($grandTotal * ($vendorCommissionPct / 100), 2);
+        $advanceAmount          = $quote['advance_amount'] ?? round($grandTotal * 0.20, 2);
 
         DB::beginTransaction();
         try {
@@ -179,8 +221,9 @@ class BookingController extends Controller
                 'drop_contact_mobile'      => $request->drop_contact_mobile,
                 'shifting_date'            => $request->shifting_date,
                 'shifting_time'            => $request->shifting_time,
+                'floors'                   => $request->input('floors', 0),
                 'status'                   => $request->status,
-                'tracking_status'          => 'pending_confirmation',
+                'tracking_status'          => $request->status === 'confirmed' ? 'confirmed' : ($request->status === 'in_progress' ? 'trip_started' : ($request->status === 'completed' ? 'completed' : ($request->status === 'cancelled' ? 'cancelled' : 'pending_confirmation'))),
 
                 // PricingEngine output
                 'total_volume_score'       => $quote['total_volume_score'],
@@ -193,17 +236,21 @@ class BookingController extends Controller
                 'floor_charges'            => $quote['floor_charges'],
                 'weekend_charges'          => $quote['weekend_charges'],
                 'month_end_charges'        => $quote['month_end_charges'],
-                'amount'                   => $quote['total_amount'],
+                'loading_charge'           => $loadingCharge,
+                'unloading_charge'         => $unloadingCharge,
+                'packing_charge'           => $packingCharge,
+                'labour_charge'            => $labourCharge,
+                'amount'                   => $grandTotal,
 
                 // Payment breakdown
                 'advance_amount'           => $advanceAmount,
-                'remaining_amount'         => $quote['total_amount'] - $advanceAmount,
+                'remaining_amount'         => $grandTotal - $advanceAmount,
                 'advance_payment_status'   => 'pending',
                 'remaining_payment_status' => 'pending',
 
                 // Vendor settlement
                 'vendor_commission_amount' => $vendorCommissionAmount,
-                'vendor_settlement_amount' => $quote['total_amount'] - $vendorCommissionAmount,
+                'vendor_settlement_amount' => $grandTotal - $vendorCommissionAmount,
             ]);
 
             // Save booked items to pivot
@@ -255,10 +302,39 @@ class BookingController extends Controller
      */
     public function edit(Booking $booking)
     {
-        $booking->load(['items', 'addOns']);
-        $items  = \App\Models\Item::where('status', 'active')->orderBy('volume_score')->get();
+        $booking->load(['customer', 'items', 'addOns']);
+        
+        $itemSizes = \App\Models\ItemSize::where('status', 'active')
+            ->with(['items' => function ($query) {
+                $query->where('status', 'active');
+            }])->get();
         $addons = \App\Models\AddOn::where('status', 'active')->get();
-        return view('Backend.Booking.Edit', compact('booking', 'items', 'addons'));
+
+        $pricingSettings = PricingSetting::whereIn('key', [
+            'per_km_rate',
+            'per_floor_charge',
+            'weekend_surge_percentage',
+            'month_end_surge_percentage',
+            'peak_time_surge_percentage',
+            'peak_time_start',
+            'peak_time_end',
+            'advance_payment_percentage',
+        ])->get()->keyBy('key');
+
+        $pricingConfig = [
+            'per_km_rate' => (float) ($pricingSettings->get('per_km_rate')->value ?? 20),
+            'per_floor_charge' => (float) ($pricingSettings->get('per_floor_charge')->value ?? 150),
+            'weekend_surge_percentage' => (float) ($pricingSettings->get('weekend_surge_percentage')->value ?? 10),
+            'month_end_surge_percentage' => (float) ($pricingSettings->get('month_end_surge_percentage')->value ?? 15),
+            'peak_time_surge_percentage' => (float) ($pricingSettings->get('peak_time_surge_percentage')->value ?? 0),
+            'peak_time_start' => $pricingSettings->get('peak_time_start')->value ?? '20:00',
+            'peak_time_end' => $pricingSettings->get('peak_time_end')->value ?? '23:00',
+            'advance_payment_percentage' => (float) ($pricingSettings->get('advance_payment_percentage')->value ?? 20),
+        ];
+
+        $customers = User::role('Customer')->orderBy('name')->get();
+
+        return view('Backend.Booking.Edit', compact('booking', 'itemSizes', 'addons', 'pricingConfig', 'customers'));
     }
 
     /**
@@ -267,22 +343,30 @@ class BookingController extends Controller
     public function update(Request $request, Booking $booking)
     {
         $validator = Validator::make($request->all(), [
-            'pickup_location'  => 'required|string|max:500',
-            'drop_location'    => 'required|string|max:500',
-            'pickup_latitude'  => 'nullable|numeric',
-            'pickup_longitude' => 'nullable|numeric',
-            'drop_latitude'    => 'nullable|numeric',
-            'drop_longitude'   => 'nullable|numeric',
-            'shifting_date'    => 'required|date',
-            'shifting_time'    => 'required',
-            'status'           => 'required|in:pending,confirmed,in_progress,completed,cancelled',
-            'tracking_status'  => 'required|in:pending_confirmation,confirmed,trip_started,shifting_started,pickup_completed,completed',
-            'items'            => 'nullable|array',
-            'items.*.id'       => 'exists:items,id',
-            'items.*.quantity' => 'integer|min:1|max:50',
-            'addons'           => 'nullable|array',
-            'addons.*'         => 'exists:add_ons,id',
-            'floors'           => 'nullable|integer|min:0|max:20',
+            'pickup_location'       => 'required|string|max:500',
+            'drop_location'         => 'required|string|max:500',
+            'pickup_latitude'       => 'nullable|numeric',
+            'pickup_longitude'      => 'nullable|numeric',
+            'drop_latitude'         => 'nullable|numeric',
+            'drop_longitude'        => 'nullable|numeric',
+            'pickup_contact_name'   => 'nullable|string|max:255',
+            'pickup_contact_mobile' => 'nullable|string|max:20',
+            'drop_contact_name'     => 'nullable|string|max:255',
+            'drop_contact_mobile'   => 'nullable|string|max:20',
+            'shifting_date'         => 'required|date',
+            'shifting_time'         => 'required',
+            'status'                => 'required|in:pending,confirmed,in_progress,completed,cancelled',
+            'tracking_status'       => 'required|in:pending_confirmation,confirmed,trip_started,shifting_started,pickup_completed,completed',
+            'items'                 => 'nullable|array',
+            'items.*.id'            => 'exists:items,id',
+            'items.*.quantity'      => 'integer|min:1|max:50',
+            'addons'                => 'nullable|array',
+            'addons.*'              => 'exists:add_ons,id',
+            'floors'                => 'nullable|integer|min:0|max:20',
+            'loading_charge'        => 'nullable|numeric|min:0',
+            'unloading_charge'      => 'nullable|numeric|min:0',
+            'packing_charge'        => 'nullable|numeric|min:0',
+            'labour_charge'         => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -291,6 +375,11 @@ class BookingController extends Controller
             }
             return back()->withErrors($validator)->withInput();
         }
+
+        $loadingCharge   = (float) $request->input('loading_charge',   0);
+        $unloadingCharge = (float) $request->input('unloading_charge', 0);
+        $packingCharge   = (float) $request->input('packing_charge',   0);
+        $labourCharge    = (float) $request->input('labour_charge',    0);
 
         $engine = new PricingEngine();
         $quote  = $engine->calculateQuote([
@@ -301,6 +390,7 @@ class BookingController extends Controller
             'drop_latitude'     => $request->drop_latitude,
             'drop_longitude'    => $request->drop_longitude,
             'shifting_date'     => $request->shifting_date,
+            'shifting_time'     => $request->shifting_time,
             'floors'            => $request->input('floors', 0),
         ]);
 
@@ -311,8 +401,10 @@ class BookingController extends Controller
             return back()->withInput()->with('error', $quote['survey_message']);
         }
 
-        $advanceAmount          = round($quote['total_amount'] * 0.20, 2);
-        $vendorCommissionAmount = round($quote['total_amount'] * 0.15, 2);
+        $extraChargesTotal      = $loadingCharge + $unloadingCharge + $packingCharge + $labourCharge;
+        $grandTotal             = $quote['total_amount'] + $extraChargesTotal;
+        $advanceAmount          = $quote['advance_amount'] ?? round($grandTotal * 0.20, 2);
+        $vendorCommissionAmount = round($grandTotal * 0.15, 2);
 
         DB::beginTransaction();
         try {
@@ -329,6 +421,7 @@ class BookingController extends Controller
                 'drop_contact_mobile'      => $request->drop_contact_mobile,
                 'shifting_date'            => $request->shifting_date,
                 'shifting_time'            => $request->shifting_time,
+                'floors'                   => $request->input('floors', 0),
                 'status'                   => $request->status,
                 'tracking_status'          => $request->tracking_status,
                 'total_volume_score'       => $quote['total_volume_score'],
@@ -341,11 +434,15 @@ class BookingController extends Controller
                 'floor_charges'            => $quote['floor_charges'],
                 'weekend_charges'          => $quote['weekend_charges'],
                 'month_end_charges'        => $quote['month_end_charges'],
-                'amount'                   => $quote['total_amount'],
+                'loading_charge'           => $loadingCharge,
+                'unloading_charge'         => $unloadingCharge,
+                'packing_charge'           => $packingCharge,
+                'labour_charge'            => $labourCharge,
+                'amount'                   => $grandTotal,
                 'advance_amount'           => $advanceAmount,
-                'remaining_amount'         => $quote['total_amount'] - $advanceAmount,
+                'remaining_amount'         => $grandTotal - $advanceAmount,
                 'vendor_commission_amount' => $vendorCommissionAmount,
-                'vendor_settlement_amount' => $quote['total_amount'] - $vendorCommissionAmount,
+                'vendor_settlement_amount' => $grandTotal - $vendorCommissionAmount,
             ]);
 
             // Sync items
@@ -411,7 +508,7 @@ class BookingController extends Controller
     public function searchCustomers(Request $request)
     {
         $search    = $request->q;
-        $customers = User::role('User')
+        $customers = User::role('Customer')
             ->where(function ($q) use ($search) {
                 $q->where('name',   'LIKE', "%{$search}%")
                   ->orWhere('email',  'LIKE', "%{$search}%")

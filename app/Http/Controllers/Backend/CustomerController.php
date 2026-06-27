@@ -24,7 +24,7 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $customers = User::role('User')->orderBy('created_at', 'desc');
+            $customers = User::role('Customer')->orderBy('created_at', 'desc');
 
             return datatables()->of($customers)
                 ->addColumn('image', function ($customer) {

@@ -40,12 +40,17 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'category_name' => 'required|string|max:255',
-            'vehicle_id'    => 'required|exists:vehicles,id',
-            'min_score'     => 'required|integer|min:0',
-            'max_score'     => 'required|integer|gte:min_score',
-            'base_fare'     => 'required|numeric|min:0',
-            'status'        => 'required|boolean',
+            'category_name'                => 'required|string|max:255',
+            'vehicle_id'                   => 'required|exists:vehicles,id',
+            'min_score'                    => 'required|integer|min:0',
+            'max_score'                    => 'required|integer|gte:min_score',
+            'base_fare'                    => 'required|numeric|min:0',
+            'weekend_surcharge_percent'   => 'nullable|numeric|min:0|max:100',
+            'month_end_surcharge_percent' => 'nullable|numeric|min:0|max:100',
+            'peak_time_surcharge_percent' => 'nullable|numeric|min:0|max:100',
+            'peak_time_start'              => 'nullable',
+            'peak_time_end'                => 'nullable',
+            'status'                       => 'required|boolean',
         ]);
         $category = Category::create($data);
         return response()->json(['success' => true, 'message' => 'Category created successfully.', 'data' => $category]);
@@ -68,12 +73,18 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
         $data = $request->validate([
-            'category_name' => 'required|string|max:255',
-            'vehicle_id'    => 'required|exists:vehicles,id',
-            'min_score'     => 'required|integer|min:0',
-            'max_score'     => 'required|integer|gte:min_score',
-            'base_fare'     => 'required|numeric|min:0',
-            'status'        => 'required|boolean',
+            'category_name'                => 'required|string|max:255',
+            'vehicle_id'                   => 'required|exists:vehicles,id',
+            'min_score'                    => 'required|integer|min:0',
+            'max_score'                    => 'required|integer|gte:min_score',
+            'base_fare'                    => 'required|numeric|min:0',
+            'price_per_point'              => 'nullable|numeric|min:0',
+            'weekend_surcharge_percent'   => 'nullable|numeric|min:0|max:100',
+            'month_end_surcharge_percent' => 'nullable|numeric|min:0|max:100',
+            'peak_time_surcharge_percent' => 'nullable|numeric|min:0|max:100',
+            'peak_time_start'              => 'nullable',
+            'peak_time_end'                => 'nullable',
+            'status'                       => 'required|boolean',
         ]);
         $category->update($data);
         return response()->json(['success' => true, 'message' => 'Category updated successfully.', 'data' => $category]);

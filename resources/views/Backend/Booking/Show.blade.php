@@ -31,6 +31,11 @@
                         <div class="col-md-6">
                             <span class="text-muted d-block fs-11">Pickup Location</span>
                             <span class="fw-semibold text-success fs-14"><i class="ri-map-pin-user-line me-1"></i>{{ $booking->pickup_location }}</span>
+                            @if($booking->pickup_contact_name || $booking->pickup_contact_mobile)
+                                <div class="mt-2 text-dark fs-12">
+                                    <i class="ri-user-line me-1 text-muted"></i><strong>Contact:</strong> {{ $booking->pickup_contact_name ?? '—' }} ({{ $booking->pickup_contact_mobile ?? '—' }})
+                                </div>
+                            @endif
                             @if ($booking->pickup_latitude && $booking->pickup_longitude)
                                 <a href="https://www.google.com/maps/search/?api=1&query={{ $booking->pickup_latitude }},{{ $booking->pickup_longitude }}" target="_blank" class="d-block small text-primary mt-1">
                                     <i class="ri-external-link-line me-1"></i>View on Google Maps ({{ $booking->pickup_latitude }}, {{ $booking->pickup_longitude }})
@@ -40,6 +45,11 @@
                         <div class="col-md-6">
                             <span class="text-muted d-block fs-11">Drop Location</span>
                             <span class="fw-semibold text-danger fs-14"><i class="ri-map-pin-5-line me-1"></i>{{ $booking->drop_location }}</span>
+                            @if($booking->drop_contact_name || $booking->drop_contact_mobile)
+                                <div class="mt-2 text-dark fs-12">
+                                    <i class="ri-user-line me-1 text-muted"></i><strong>Contact:</strong> {{ $booking->drop_contact_name ?? '—' }} ({{ $booking->drop_contact_mobile ?? '—' }})
+                                </div>
+                            @endif
                             @if ($booking->drop_latitude && $booking->drop_longitude)
                                 <a href="https://www.google.com/maps/search/?api=1&query={{ $booking->drop_latitude }},{{ $booking->drop_longitude }}" target="_blank" class="d-block small text-primary mt-1">
                                     <i class="ri-external-link-line me-1"></i>View on Google Maps ({{ $booking->drop_latitude }}, {{ $booking->drop_longitude }})
@@ -66,6 +76,97 @@
                                     <span class="badge bg-light text-dark">Direct Admin Creation</span>
                                 @endif
                             </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booked Items & Add-ons -->
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+                        <span class="badge bg-warning-subtle text-warning p-2 rounded-circle"><i class="ri-box-3-line"></i></span>
+                        Shifting Items & Add-Ons
+                    </h5>
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">Volume: {{ $booking->total_volume_score }} pts</span>
+                        @if($booking->category)
+                            <span class="badge bg-info-subtle text-info px-3 py-2 rounded-pill">Category: {{ $booking->category->category_name }}</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Pricing attributes summary -->
+                    <div class="row g-3 mb-4 bg-light p-3 rounded-3 mx-0">
+                        <div class="col-md-3 text-center border-end">
+                            <span class="text-muted fs-11 d-block mb-1">Vehicle Assigned</span>
+                            <span class="fw-semibold text-dark"><i class="ri-truck-line me-1 text-primary"></i>{{ $booking->vehicle ? $booking->vehicle->vehicle_name : 'None' }}</span>
+                        </div>
+                        <div class="col-md-3 text-center border-end">
+                            <span class="text-muted fs-11 d-block mb-1">Total Distance</span>
+                            <span class="fw-semibold text-dark"><i class="ri-map-pin-line me-1 text-success"></i>{{ $booking->total_distance ?? 0 }} km</span>
+                        </div>
+                        <div class="col-md-3 text-center border-end">
+                            <span class="text-muted fs-11 d-block mb-1">Floors (No Lift)</span>
+                            <span class="fw-semibold text-dark"><i class="ri-building-line me-1 text-warning"></i>{{ $booking->floors ?? 0 }} floors</span>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <span class="text-muted fs-11 d-block mb-1">Pricing Formula</span>
+                            <span class="fw-medium text-dark small">{{ $booking->category && $booking->category->price_per_point > 0 ? 'Point-based' : 'Base-fare' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Items list -->
+                        <div class="col-md-7">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="ri-box-3-fill text-warning"></i> Items to Shift 
+                                <span class="badge bg-warning-subtle text-warning fs-11 rounded-pill">{{ $booking->items->count() }} items</span>
+                            </h6>
+                            @if($booking->items->isEmpty())
+                                <div class="text-muted fs-12 py-3 bg-light text-center rounded">No items selected.</div>
+                            @else
+                                <div class="table-responsive border rounded" style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead class="bg-light sticky-top">
+                                            <tr>
+                                                <th class="ps-3 border-0 py-2 fs-11 text-uppercase text-muted">Item Name</th>
+                                                <th class="border-0 py-2 fs-11 text-uppercase text-muted text-center">Qty</th>
+                                                <th class="border-0 py-2 fs-11 text-uppercase text-muted text-end pe-3">Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($booking->items as $itm)
+                                                <tr>
+                                                    <td class="ps-3 py-2 fw-medium text-dark fs-12">{{ $itm->item_name }}</td>
+                                                    <td class="py-2 text-center fs-12"><span class="badge bg-light text-dark px-2 border">{{ $itm->pivot->quantity }}</span></td>
+                                                    <td class="pe-3 py-2 text-end text-muted fs-12">{{ $itm->pivot->calculated_volume_score }} pts</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Addons list -->
+                        <div class="col-md-5">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="ri-service-fill text-info"></i> Add-on Services
+                                <span class="badge bg-info-subtle text-info fs-11 rounded-pill">{{ $booking->addOns->count() }} services</span>
+                            </h6>
+                            @if($booking->addOns->isEmpty())
+                                <div class="text-muted fs-12 py-3 bg-light text-center rounded">No add-ons selected.</div>
+                            @else
+                                <div class="list-group list-group-flush border rounded overflow-hidden">
+                                    @foreach($booking->addOns as $ad)
+                                        <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 fs-12">
+                                            <span class="fw-medium text-dark"><i class="ri-checkbox-circle-fill text-success me-2"></i>{{ $ad->addon_name }}</span>
+                                            <span class="badge bg-success-subtle text-success">₹{{ number_format($ad->pivot->price ?? $ad->price, 0) }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -160,6 +261,41 @@
                     <h2 class="mb-0 text-primary fw-bold">₹{{ number_format($booking->amount, 2) }}</h2>
                 </div>
             </div>
+
+            {{-- Extra Charges Breakdown (show only if any > 0) --}}
+            @if ($booking->loading_charge > 0 || $booking->unloading_charge > 0 || $booking->packing_charge > 0 || $booking->labour_charge > 0)
+            <div class="card mb-4 border shadow-none">
+                <div class="card-header py-2">
+                    <h6 class="card-title mb-0 fs-13"><i class="ri-money-rupee-circle-line me-1 text-danger"></i>Extra Charges Breakdown</h6>
+                </div>
+                <div class="card-body p-3">
+                    @if ($booking->loading_charge > 0)
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="fs-12 text-muted"><i class="ri-upload-2-line me-1 text-primary"></i>Loading Charge</span>
+                        <span class="fs-12 fw-semibold">₹{{ number_format($booking->loading_charge, 2) }}</span>
+                    </div>
+                    @endif
+                    @if ($booking->unloading_charge > 0)
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="fs-12 text-muted"><i class="ri-download-2-line me-1 text-success"></i>Unloading Charge</span>
+                        <span class="fs-12 fw-semibold">₹{{ number_format($booking->unloading_charge, 2) }}</span>
+                    </div>
+                    @endif
+                    @if ($booking->packing_charge > 0)
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="fs-12 text-muted"><i class="ri-box-1-line me-1 text-warning"></i>Packing Charge</span>
+                        <span class="fs-12 fw-semibold">₹{{ number_format($booking->packing_charge, 2) }}</span>
+                    </div>
+                    @endif
+                    @if ($booking->labour_charge > 0)
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="fs-12 text-muted"><i class="ri-group-line me-1 text-info"></i>Labour Charge</span>
+                        <span class="fs-12 fw-semibold">₹{{ number_format($booking->labour_charge, 2) }}</span>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
 
             <!-- Quick Action controls -->
             <div class="card mb-0">

@@ -18,6 +18,7 @@
                             <th>Min Score</th>
                             <th>Max Score</th>
                             <th>Base Fare (₹)</th>
+                            <th>Price/Point</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -41,6 +42,7 @@
             { data: 'min_score', name: 'min_score' },
             { data: 'max_score', name: 'max_score' },
             { data: 'base_fare', name: 'base_fare' },
+            { data: 'price_per_point', name: 'price_per_point' },
             { data: 'status_badge', name: 'status', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ]);
