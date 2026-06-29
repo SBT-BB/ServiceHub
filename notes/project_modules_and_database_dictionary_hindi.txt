@@ -1,0 +1,352 @@
+================================================================================
+सर्विसहब (ServiceHub) - डेटाबेस डायरेक्टरी (Database Fields) एवं एडमिन पैनल मॉड्यूल्स
+================================================================================
+
+यह दस्तावेज़ आपके पूरे सर्विसहब प्रोजेक्ट के डेटाबेस फील्ड्स, उनके नियमों (Conditions/Constraints)
+और एडमिन पैनल में शामिल होने वाले सभी मॉड्यूल्स (Modules) की विस्तृत जानकारी हिंदी में प्रदान करता है।
+
+================================================================================
+भाग 1: एडमिन पैनल मॉड्यूल्स (Admin Panel Modules)
+================================================================================
+प्रोजेक्ट के पूरे फ्लो को मैनेज करने के लिए एडमिन (CRM) पैनल में निम्नलिखित मुख्य मॉड्यूल्स होंगे:
+
+1. डैशबोर्ड मॉड्यूल (Dashboard Module)
+   - मुख्य काम: पूरे सिस्टम की लाइव स्थिति देखना।
+   - फीचर्स:
+     * कुल बुकिंग्स, पेंडिंग बुकिंग्स, एक्टिव शिफ्टिंग और पूरी हुई बुकिंग्स के आंकड़े।
+     * कुल रेवेन्यू (Revenue) और कलेक्ट किया गया कमीशन (20%)।
+     * लाइव ऑर्डर ट्रैकिंग मैप या लिस्ट।
+
+2. यूजर मैनेजमेंट मॉड्यूल (User Management Module)
+   - मुख्य काम: ऐप के सभी प्रकार के यूजर्स को मैनेज करना।
+   - सब-मॉड्यूल्स:
+     * ग्राहक (Customers List): ग्राहकों की जानकारी, उनके बुकिंग इतिहास।
+     * वेंडर (Vendors List): वेंडर्स की जानकारी, उनके दस्तावेज़, वॉलेट बैलेंस।
+     * सुपरवाइज़र (Supervisors List): सुपरवाइजर्स की जानकारी और वे किस वेंडर से जुड़े हैं।
+     * वेंडर-सुपरवाइज़र मैपिंग (Vendor-Supervisor Mapping): वेंडर्स को उनके 3-4 सुपरवाइजर्स से लिंक करना।
+
+3. बुकिंग मैनेजमेंट मॉड्यूल (Booking Management Module)
+   - मुख्य काम: बुकिंग्स के पूरे लाइफसाइकिल को मैनेज करना।
+   - फीचर्स:
+     * बुकिंग रिक्वेस्ट्स (Instacode Requests): ग्राहकों द्वारा भेजी गई नई रिक्वेस्ट्स को मंजूर या नामंजूर करना।
+     * बुकिंग लिस्ट (All Bookings): सभी एक्टिव, शेड्यूल्ड और कम्प्लीट बुकिंग्स की लिस्ट।
+     * वेंडर असाइनमेंट (Vendor Assignment): बुकिंग्स को सही वेंडर को सौंपना (मैन्युअली या आटोमेटिक)।
+     * बुकिंग एडिट (Edit Booking): शिफ्टिंग के दौरान या पहले सामान (Items), फ्लोर, दूरी, या ऐड-ऑन्स बदलना।
+     * लाइव ट्रैकिंग (Live Order Tracking): बुकिंग के हर स्टेज का स्टेटस देखना।
+
+4. वेंडर वॉलेट और कमीशन सेटलमेंट (Vendor Wallet & Settlements)
+   - मुख्य काम: वेंडर के पैसे और 20% कमीशन को ट्रैक करना।
+   - फीचर्स:
+     * वेंडर वॉलेट लेजर (Wallet Balances): किस वेंडर के वॉलेट में कितना पैसा है।
+     * लेनदेन का इतिहास (Wallet Transactions): कमीशन डेबिट और सेटलमेंट क्रेडिट की लिस्ट।
+     * वेंडर पेमेंट सेटलमेंट (Vendor Payouts): वेंडर के बैंक अकाउंट में 80% राशि ट्रांसफर करने के बाद उसे सिस्टम में सेटल करना।
+
+5. मास्टर डेटा मैनेजमेंट (Master Data Management)
+   - मुख्य काम: शिफ्टिंग में इस्तेमाल होने वाले सामानों और गाड़ियों की लिस्ट मैनेज करना।
+   - सब-मॉड्यूल्स:
+     * गाड़ी मैनेजमेंट (Vehicles Master): गाड़ियों के नाम और उनकी कैपेसिटी स्कोर।
+     * केटेगरी मैनेजमेंट (Categories Master): 1 BHK, 2 BHK, या स्माल ऑफिस केटेगरी, उनके बेस फेयर और वॉल्यूम सीमा।
+     * आइटम मैनेजमेंट (Items Master): शिफ्टिंग आइटम्स (जैसे सोफा, बेड, फ्रिज) और उनके वॉल्यूम स्कोर।
+     * आइटम साइज मैनेजमेंट (Item Sizes Master): आइटम्स के साइज़ (Small, Medium, Large) और उनके अलग स्कोर्स।
+     * ऐड-ऑन्स सर्विसेज (Add-ons Master): पैकिंग, लेबर, अनपैकिंग के नाम और रेट्स।
+
+6. प्राइसिंग और चार्ज सेटिंग्स (Pricing & Charge Settings)
+   - मुख्य काम: डायनामिक चार्जेस की सेटिंग्स मैनेज करना।
+   - फीचर्स:
+     * वीकेंड सर्चार्ज प्रतिशत (Weekend Surcharge %) सेट करना।
+     * मंथ-एंड सर्चार्ज प्रतिशत (Month-End Surcharge %) सेट करना।
+     * पीक टाइम सर्चार्ज प्रतिशत और समय सीमा (Peak Time & Surcharges) सेट करना।
+     * फ्लोर चार्जेस रूल्स (Floor Charges with/without Lift)।
+
+7. फीडबैक और रिपोर्ट्स (Feedback & Reports)
+   - मुख्य काम: सर्विस क्वालिटी और बिज़नेस ग्रोथ रिपोर्ट देखना।
+   - फीचर्स:
+     * ग्राहकों द्वारा दिया गया फीडबैक और रेटिंग्स।
+     * दैनिक, साप्ताहिक और मासिक रेवेन्यू रिपोर्ट्स (Revenue Reports)।
+     * वेंडर परफॉरमेंस और कमीशन रिपोर्ट्स।
+
+
+================================================================================
+भाग 2: डेटाबेस टेबल्स, फील्ड्स और शर्तें (Database Tables, Fields & Conditions)
+================================================================================
+
+यहाँ प्रत्येक टेबल के फील्ड्स, उनके डेटा टाइप्स (Data Types) और कंडीशन्स की सूची है:
+
+--------------------------------------------------------------------------------
+1. टेबल: `users` (यूजर की जानकारी)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `first_name` | String / Nullable | NULL | - |
+| `last_name` | String / Nullable | NULL | - |
+| `name` | String | - | Required |
+| `email` | String | - | Unique, Required |
+| `email_verified_at` | Timestamp / Nullable | NULL | - |
+| `password` | String | - | Hashed, Required |
+| `image` | String / Nullable | NULL | प्रोफाइल फोटो का पथ |
+| `phone` | String / Nullable | NULL | - |
+| `mobile` | String / Nullable | NULL | Unique |
+| `date_of_birth` | Date / Nullable | NULL | - |
+| `gender` | String / Nullable | NULL | - |
+| `address` | Text / Nullable | NULL | - |
+| `city` | String / Nullable | NULL | - |
+| `state` | String / Nullable | NULL | - |
+| `country` | String / Nullable | NULL | - |
+| `postal_code` | String / Nullable | NULL | - |
+| `status` | Enum ('active', 'inactive') | 'active' | एक्टिव या इनएक्टिव यूजर |
+| `remember_token` | String / Nullable | NULL | Laravel Auth Token |
+| `created_at` / `updated_at`| Timestamp | - | Auto generated |
+
+--------------------------------------------------------------------------------
+2. टेबल: `booking_requests` (इंस्टाकोड रिक्वेस्ट्स)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `customer_id` | Foreign Key (`users.id`) | - | Cascade on Delete, Required |
+| `pickup_location` | String | - | Required |
+| `drop_location` | String | - | Required |
+| `pickup_latitude` | Double / Nullable | NULL | - |
+| `pickup_longitude` | Double / Nullable | NULL | - |
+| `drop_latitude` | Double / Nullable | NULL | - |
+| `drop_longitude` | Double / Nullable | NULL | - |
+| `shifting_date` | Date | - | Required |
+| `shifting_time` | Time | - | Required |
+| `estimated_amount` | Decimal (10, 2) | 0.00 | - |
+| `status` | Enum ('pending', 'approved', 'rejected') | 'pending' | - |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+3. टेबल: `bookings` (बुकिंग्स का मुख्य डेटा)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `booking_number` | String | - | Unique, Auto Generated (SH-YYYYMMDD-XXXX) |
+| `customer_id` | Foreign Key (`users.id`) | - | Cascade on Delete, Required |
+| `vendor_id` | Foreign Key (`users.id`) / Null | NULL | Set Null on Delete |
+| `supervisor_id` | Foreign Key (`users.id`) / Null | NULL | (प्रस्तावित) वेंडर द्वारा असाइन किया गया |
+| `booking_request_id` | Foreign Key (`booking_requests.id`) / Null | NULL | Set Null on Delete |
+| `pickup_location` | String | - | Required |
+| `drop_location` | String | - | Required |
+| `pickup_latitude` | Double / Nullable | NULL | - |
+| `pickup_longitude` | Double / Nullable | NULL | - |
+| `drop_latitude` | Double / Nullable | NULL | - |
+| `drop_longitude` | Double / Nullable | NULL | - |
+| `pickup_contact_name`| String / Nullable | NULL | - |
+| `pickup_contact_mobile`| String / Nullable | NULL | - |
+| `drop_contact_name` | String / Nullable | NULL | - |
+| `drop_contact_mobile` | String / Nullable | NULL | - |
+| `total_distance` | Decimal (8, 2) | 0.00 | - |
+| `total_volume_score` | Integer | 0 | सामानों का कुल वॉल्यूम जोड़ |
+| `category_id` | Foreign Key (`categories.id`) / Null | NULL | Set Null on Delete |
+| `vehicle_id` | Foreign Key (`vehicles.id`) / Null | NULL | Set Null on Delete |
+| `shifting_date` | Date | - | Required |
+| `shifting_time` | Time | - | Required |
+| `floors` | Integer | 0 | - |
+| `amount` | Decimal (10, 2) | 0.00 | कुल बुकिंग राशि |
+| `base_fare` | Decimal (10, 2) | 0.00 | केटेगरी का बेस फेयर |
+| `distance_charges` | Decimal (10, 2) | 0.00 | प्रति किलोमीटर की दर से चार्ज |
+| `addon_charges` | Decimal (10, 2) | 0.00 | कुल ऐड-ऑन्स चार्ज |
+| `floor_charges` | Decimal (10, 2) | 0.00 | फ्लोर वाइज़ एक्स्ट्रा चार्ज |
+| `weekend_charges` | Decimal (10, 2) | 0.00 | वीकेंड बुकिंग सर्चार्ज |
+| `month_end_charges` | Decimal (10, 2) | 0.00 | मंथ-एंड सर्चार्ज |
+| `loading_charge` | Decimal (10, 2) | 0.00 | सामान चढ़ाने का चार्ज |
+| `unloading_charge` | Decimal (10, 2) | 0.00 | सामान उतारने का चार्ज |
+| `packing_charge` | Decimal (10, 2) | 0.00 | पैकिंग करने का चार्ज |
+| `labour_charge` | Decimal (10, 2) | 0.00 | लेबर का चार्ज |
+| `advance_amount` | Decimal (10, 2) | 500.00 | एडवांस भुगतान राशि |
+| `remaining_amount` | Decimal (10, 2) | 0.00 | (amount - advance_amount) |
+| `vendor_commission_amount`| Decimal (10, 2) | 0.00 | 20% कमीशन राशि |
+| `vendor_settlement_amount`| Decimal (10, 2) | 0.00 | वेंडर को भुगतान की जाने वाली राशि (80%) |
+| `status` | Enum ('pending', 'confirmed', 'in_progress', 'completed', 'cancelled') | 'pending' | मुख्य बुकिंग स्टेटस |
+| `tracking_status` | String | 'pending_confirmation' | लाइव ट्रैकिंग स्टेटस |
+| `advance_payment_status` | Enum ('pending', 'paid') | 'pending' | एडवांस पेमेंट स्टेटस |
+| `remaining_payment_status` | Enum ('pending', 'paid') | 'pending' | शेष पेमेंट स्टेटस |
+| `vendor_acceptance_status` | Enum ('pending', 'accepted', 'rejected') | 'pending' | (प्रस्तावित) वेंडर का रिस्पांस |
+| `supervisor_acceptance_status`| Enum ('pending', 'accepted', 'rejected')| 'pending' | (प्रस्तावित) सुपरवाइज़र का रिस्पांस |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+4. टेबल: `items` (सामान मास्टर)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `item_name` | String | - | Required |
+| `volume_score` | Integer | 1 | सामान का आयतन/वजन स्कोर |
+| `status` | Enum ('active', 'inactive') | 'active' | - |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+5. टेबल: `item_sizes` (सामान के साइज़ मास्टर)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `size_name` | String | - | उदा: Small, Medium, Large |
+| `volume_score` | Integer | 1 | इस साइज़ का वॉल्यूम स्कोर |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+6. टेबल: `booking_items` (बुकिंग में सामानों की मैपिंग)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `booking_id` | Foreign Key (`bookings.id`) | - | Cascade on Delete, Required |
+| `item_id` | Foreign Key (`items.id`) | - | Cascade on Delete, Required |
+| `quantity` | Integer | - | सामान की मात्रा |
+| `calculated_volume_score` | Integer | - | quantity * item's volume_score |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+7. टेबल: `vehicles` (गाड़ी मास्टर)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `vehicle_name` | String | - | गाड़ी का नाम (उदा: Tata Ace, Bolero Pickup) |
+| `vehicle_capacity_score`| Integer | 1 | गाड़ी की सामान ले जाने की क्षमता |
+| `status` | Enum ('active', 'inactive') | 'active' | - |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+8. टेबल: `categories` (केटेगरी मास्टर)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `category_name` | String | - | उदा: 1 BHK, 2 BHK, Small Office |
+| `vehicle_id` | Foreign Key (`vehicles.id`) / Null | NULL | Set Null on Delete |
+| `min_score` | Integer | 0 | न्यूनतम वॉल्यूम स्कोर इस केटेगरी के लिए |
+| `max_score` | Integer | 0 | अधिकतम वॉल्यूम स्कोर इस केटेगरी के लिए |
+| `base_fare` | Decimal (10, 2) | 0.00 | केटेगरी का मूल किराया |
+| `price_per_point` | Decimal (10, 2) | 0.00 | प्रति वॉल्यूम पॉइंट एक्स्ट्रा चार्ज |
+| `weekend_surcharge_percent`| Decimal (5, 2) | 0.00 | वीकेंड पर लगने वाला एक्स्ट्रा % |
+| `month_end_surcharge_percent`| Decimal (5, 2) | 0.00 | महीने के अंत में लगने वाला एक्स्ट्रा % |
+| `peak_time_surcharge_percent`| Decimal (5, 2) | 0.00 | व्यस्त घंटों (Peak time) में एक्स्ट्रा % |
+| `peak_time_start` | String / Nullable | NULL | पीक टाइम शुरू होने का समय (HH:MM) |
+| `peak_time_end` | String / Nullable | NULL | पीक टाइम ख़त्म होने का समय (HH:MM) |
+| `status` | Enum ('active', 'inactive') | 'active' | - |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+9. टेबल: `add_ons` (अतिरिक्त सर्विसेज मास्टर)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `addon_name` | String | - | उदा: Double Layer Packing, Single Bed Packing |
+| `price` | Decimal (10, 2) | 0.00 | सर्विस की कीमत |
+| `status` | Enum ('active', 'inactive') | 'active' | - |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+10. टेबल: `booking_add_ons` (बुकिंग में एड-ऑन्स की मैपिंग)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `booking_id` | Foreign Key (`bookings.id`) | - | Cascade on Delete |
+| `add_on_id` | Foreign Key (`add_ons.id`) | - | Cascade on Delete |
+| `price` | Decimal (10, 2) | - | बुकिंग के समय की कीमत |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+11. टेबल: `order_trackings` (लाइव ट्रैकिंग हिस्ट्री)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `booking_id` | Foreign Key (`bookings.id`) | - | Cascade on Delete |
+| `status` | String | - | ट्रैकिंग स्टेटस का नाम |
+| `description` | Text / Nullable | NULL | स्टेटस का विस्तृत विवरण |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+12. टेबल: `feedback` (फीडबैक और रेटिंग)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `booking_id` | Foreign Key (`bookings.id`) | - | Cascade on Delete |
+| `rating` | Integer | - | 1 से 5 स्टार रेटिंग |
+| `comment` | Text / Nullable | NULL | ग्राहक का रिव्यु |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+13. टेबल: `pricing_settings` (सामान्य चार्ज सेटिंग्स)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `key` | String | - | Unique (उदा: 'per_floor_charge', 'lift_discount') |
+| `value` | String / Nullable | NULL | - |
+| `is_enabled` | Boolean | true | सेटिंग ऑन/ऑफ करने के लिए |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+14. टेबल: `vendor_supervisors` (प्रस्तावित - वेंडर और सुपरवाइज़र लिंकिंग)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `vendor_id` | Foreign Key (`users.id`) | - | Cascade on Delete (वेंडर का ID) |
+| `supervisor_id` | Foreign Key (`users.id`) | - | Cascade on Delete (सुपरवाइज़र का ID) |
+| `status` | Enum ('active', 'inactive') | 'active' | - |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+15. टेबल: `wallets` (प्रस्तावित - वेंडर का डिजिटल वॉलेट)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `user_id` | Foreign Key (`users.id`) | - | Cascade on Delete (वेंडर का ID) |
+| `balance` | Decimal (10, 2) | 0.00 | करंट वॉलेट बैलेंस |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+--------------------------------------------------------------------------------
+16. टेबल: `wallet_transactions` (प्रस्तावित - वॉलेट लेनदेन)
+--------------------------------------------------------------------------------
+| फील्ड का नाम (Field) | टाइप (Data Type) | डिफ़ॉल्ट (Default) | शर्तें/नियम (Conditions) |
+| :--- | :--- | :--- | :--- |
+| `id` | BigInt (Auto Increment) | - | Primary Key |
+| `wallet_id` | Foreign Key (`wallets.id`) | - | Cascade on Delete |
+| `booking_id` | Foreign Key (`bookings.id`) / Null| NULL | Set Null on Delete |
+| `amount` | Decimal (10, 2) | - | क्रेडिट (+) या डेबिट (-) राशि |
+| `type` | Enum ('credit', 'debit') | - | - |
+| `description` | String | - | उदा: "20% कमीशन डेबिट हुआ", "पेआउट सेटलमेंट" |
+| `created_at` / `updated_at`| Timestamp | - | - |
+
+================================================================================
+भाग 3: डेटा फ़ील्ड वैलिडेशन और शर्तें (Data Validation & Business Rules)
+================================================================================
+प्रोजेक्ट को सही ढंग से संचालित करने के लिए मुख्य वैलिडेशन नियम निम्नलिखित हैं:
+
+1. मोबाइल नंबर और ओटीपी (Mobile Validation)
+   - प्रत्येक यूजर का मोबाइल नंबर `mobile` अनिवार्य और `unique` होना चाहिए।
+   - रजिस्ट्रेशन/लॉगिन के समय ओटीपी वेरिफिकेशन अनिवार्य है।
+
+2. ऑटो-प्राइसिंग गणना नियम (Pricing Calculation Rule)
+   जब भी कोई बुकिंग क्रिएट या एडिट होगी, कुल राशि (`amount`) निम्न प्रकार कैलकुलेट होगी:
+   - `amount` = `base_fare` (केटेगरी का) 
+                + `distance_charges` (दूरी * प्रति किमी रेट) 
+                + `addon_charges` (सभी चुने गए ऐड-ऑन्स का मूल्य)
+                + `floor_charges` (फ्लोर नंबर * प्रति फ्लोर रेट, यदि लिफ्ट नहीं है)
+                + `loading_charge` + `unloading_charge` + `packing_charge` + `labour_charge`
+                + `weekend_charges` (यदि बुकिंग शनिवार या रविवार की है)
+                + `month_end_charges` (यदि तारीख महीने के अंतिम 3 दिनों में है)
+
+3. 20% कमीशन कटौती की शर्त (Commission Trigger Condition)
+   - जैसे ही बुकिंग का `status` = 'completed' और `remaining_payment_status` = 'paid' होता है।
+   - सिस्टम बुकिंग राशि का 20% हिस्सा (`vendor_commission_amount`) कैलकुलेट करेगा।
+   - संबंधित वेंडर के वॉलेट आईडी से `wallet_transactions` टेबल में डेबिट (-) एंट्री दर्ज की जाएगी।
+   - वेंडर का वॉलेट बैलेंस (`wallets.balance`) उतनी ही राशि से कम हो जाएगा।
+
+4. सुपरवाइज़र आवंटन नियम (Supervisor Assignment Rule)
+   - वेंडर केवल उन्हीं सुपरवाइजर्स को बुकिंग असाइन कर सकता है जो `vendor_supervisors` टेबल में उसके साथ 'active' स्थिति में मैप्ड हैं।
+
+================================================================================

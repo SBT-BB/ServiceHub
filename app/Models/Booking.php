@@ -54,6 +54,11 @@ class Booking extends Model
         'vendor_id',
         'vendor_commission_amount',
         'vendor_settlement_amount',
+
+        // Supervisor & Acceptance Fields
+        'supervisor_id',
+        'vendor_acceptance_status',
+        'supervisor_acceptance_status',
     ];
 
     protected static function boot()
@@ -133,5 +138,21 @@ class Booking extends Model
     public function vendor()
     {
         return $this->belongsTo(User::class, 'vendor_id');
+    }
+
+    /**
+     * सुपरवाइज़र जो इस बुकिंग की शिफ्टिंग करेगा।
+     */
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    /**
+     * वेंडर को भेजी गई बुकिंग रिक्वेस्ट्स।
+     */
+    public function vendorRequests()
+    {
+        return $this->hasMany(BookingVendorRequest::class, 'booking_id');
     }
 }

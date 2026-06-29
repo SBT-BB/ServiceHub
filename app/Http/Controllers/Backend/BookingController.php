@@ -19,7 +19,7 @@ class BookingController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $bookings = Booking::with('customer')->orderBy('created_at', 'desc');
+            $bookings = Booking::with(['customer', 'vendor'])->orderBy('created_at', 'desc');
 
             return datatables()->of($bookings)
                 ->addColumn('customer_name', function ($booking) {
@@ -50,6 +50,9 @@ class BookingController extends Controller
                     }
                     return '<span class="badge ' . $badge . '">' . ucfirst(str_replace('_', ' ', $booking->status)) . '</span>';
                 })
+                ->addColumn('vendor_id', fn($booking) => $booking->vendor_id)
+                ->addColumn('vendor_name', fn($booking) => $booking->vendor?->name ?? '')
+                ->addColumn('vendor_acceptance_status', fn($booking) => $booking->vendor_acceptance_status)
                 ->addColumn('action', function ($booking) {
                     $showBtn = '<a href="' . route('booking.show', $booking->id) . '" class="btn icon-btn-sm btn-light-info" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="View Details"><i class="ri-eye-line"></i></a>';
                     $editBtn = '<a href="' . route('booking.edit', $booking->id) . '" class="btn icon-btn-sm btn-light-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit"><i class="ri-pencil-line"></i></a>';
@@ -89,7 +92,9 @@ class BookingController extends Controller
             'cancelled' => Booking::where('status', 'cancelled')->count(),
         ];
 
-        return view('Backend.Booking.Index', compact('stats'));
+        $vendors = User::role('Vendor')->orderBy('name')->get();
+
+        return view('Backend.Booking.Index', compact('stats', 'vendors'));
     }
 
     /**
@@ -293,7 +298,7 @@ class BookingController extends Controller
      */
     public function show(Booking $booking)
     {
-        $booking->load(['customer', 'bookingRequest', 'category', 'vehicle', 'items', 'addOns']);
+        $booking->load(['customer', 'bookingRequest', 'category', 'vehicle', 'items', 'addOns', 'supervisor']);
         return view('Backend.Booking.Show', compact('booking'));
     }
 
@@ -333,8 +338,9 @@ class BookingController extends Controller
         ];
 
         $customers = User::role('Customer')->orderBy('name')->get();
+        $vendors = User::role('Vendor')->orderBy('name')->get();
 
-        return view('Backend.Booking.Edit', compact('booking', 'itemSizes', 'addons', 'pricingConfig', 'customers'));
+        return view('Backend.Booking.Edit', compact('booking', 'itemSizes', 'addons', 'pricingConfig', 'customers', 'vendors'));
     }
 
     /**
@@ -533,5 +539,66 @@ class BookingController extends Controller
         $engine = new PricingEngine();
         $quote  = $engine->calculateQuote($request->all());
         return response()->json($quote);
+    }
+
+    /**
+     * AJAX: Assign vendor to a booking from the listing dropdown.
+     */
+    public function assignVendor(Request $request, Booking $booking)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'nullable|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $newVendorId = $request->vendor_id ?: null;
+        $oldVendorId = $booking->vendor_id;
+
+        // If the booking is already accepted, admin shouldn't change it unless needed
+        if ($booking->vendor_acceptance_status === 'accepted' && $oldVendorId != $newVendorId) {
+            return response()->json(['message' => 'This booking has already been accepted by the assigned vendor.'], 400);
+        }
+
+        if ($oldVendorId != $newVendorId) {
+            if ($oldVendorId) {
+                // Mark previous vendor request as reassigned
+                \App\Models\BookingVendorRequest::where('booking_id', $booking->id)
+                    ->where('vendor_id', $oldVendorId)
+                    ->where('status', 'pending')
+                    ->update(['status' => 'reassigned']);
+
+                // Track reassignment
+                \App\Models\OrderTracking::create([
+                    'booking_id' => $booking->id,
+                    'status' => 'reassigned',
+                    'notes' => 'Booking reassigned to another vendor. Previous vendor ID: ' . $oldVendorId,
+                ]);
+            }
+
+            if ($newVendorId) {
+                \App\Models\BookingVendorRequest::updateOrCreate(
+                    ['booking_id' => $booking->id, 'vendor_id' => $newVendorId],
+                    ['status' => 'pending']
+                );
+            }
+
+            $booking->vendor_id = $newVendorId;
+            $booking->vendor_acceptance_status = $newVendorId ? 'pending' : null;
+            $booking->save();
+        }
+
+        $name = $booking->vendor_id
+            ? User::find($booking->vendor_id)->name
+            : 'Unassigned';
+
+        return response()->json([
+            'message'                  => 'Vendor assigned: ' . $name,
+            'vendor_id'                => $booking->vendor_id,
+            'vendor_name'              => $name,
+            'vendor_acceptance_status' => $booking->vendor_acceptance_status,
+        ]);
     }
 }

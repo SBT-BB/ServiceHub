@@ -76,4 +76,32 @@ class User extends Authenticatable
     {
         return $this->hasMany(Booking::class, 'customer_id');
     }
+
+    /**
+     * वेंडर के अधीन काम करने वाले सुपरवाइज़र्स
+     */
+    public function supervisors()
+    {
+        return $this->belongsToMany(User::class, 'vendor_supervisors', 'vendor_id', 'supervisor_id')
+                    ->withPivot('status')
+                    ->withTimestamps();
+    }
+
+    /**
+     * सुपरवाइज़र किस वेंडर के अधीन काम करता है
+     */
+    public function vendorOf()
+    {
+        return $this->belongsToMany(User::class, 'vendor_supervisors', 'supervisor_id', 'vendor_id')
+                    ->withPivot('status')
+                    ->withTimestamps();
+    }
+
+    /**
+     * वेंडर का डिजिटल वॉलेट
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
 }

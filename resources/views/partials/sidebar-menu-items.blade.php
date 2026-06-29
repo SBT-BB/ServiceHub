@@ -36,12 +36,27 @@
     </li>
     @endcan
 
+    {{-- ── VENDOR SERVICE LINKS ────────────────────────────── --}}
+    @if(auth()->user() && auth()->user()->hasRole('Vendor'))
+    <li class="menu-title" role="presentation">Vendor Panel</li>
+    <li class="slide">
+        <a href="{{ route('vendor.booking.index') }}"
+           class="side-menu__item {{ request()->routeIs('vendor.booking.*') ? 'active' : '' }}" role="menuitem">
+            <span class="side_menu_icon"><i class="ri-calendar-todo-line"></i></span>
+            <span class="side-menu__label">My Bookings</span>
+        </a>
+    </li>
+    @endif
+
     {{-- ── SERVICE MANAGEMENT ──────────────────────────────── --}}
+    @if(!auth()->user() || !auth()->user()->hasRole('Vendor'))
     @canany(['view customer', 'view booking', 'view booking request'])
     <li class="menu-title" role="presentation">Service Management</li>
     @endcanany
+    @endif
 
     {{-- Customers --}}
+    @if(!auth()->user() || !auth()->user()->hasRole('Vendor'))
     @can('view customer')
     <li class="slide">
         <a href="{{ route('customer.index') }}"
@@ -51,8 +66,10 @@
         </a>
     </li>
     @endcan
+    @endif
 
     {{-- Bookings (dropdown) --}}
+    @if(!auth()->user() || !auth()->user()->hasRole('Vendor'))
     @canany(['view booking request', 'view booking'])
     <li class="slide {{ $isBookingsActive ? 'active open' : '' }}">
         <a href="#!" class="side-menu__item {{ $isBookingsActive ? 'active' : '' }}" role="menuitem">
@@ -80,6 +97,7 @@
         </ul>
     </li>
     @endcanany
+    @endif
 
     {{-- Revenue --}}
     @can('view revenue')

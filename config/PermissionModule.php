@@ -40,6 +40,7 @@ return [
             'create booking',
             'edit booking',
             'delete booking',
+            'assign vendor to booking',
         ],
         'Settings Management' => [
             'view settings',
@@ -48,6 +49,25 @@ return [
             'edit pricing settings',
             'view profile settings',
             'edit profile settings',
+        ],
+        
+        'Vendor-Supervisor' => [
+            'create vendor supervisor link',
+            'view vendor supervisor link',
+            'edit vendor supervisor link',
+            'delete vendor supervisor link',
+        ],
+        'Vendor' => [
+            'view vendor',
+            'create vendor',
+            'edit vendor',
+            'delete vendor',
+        ],
+        'Supervisor' => [
+            'view supervisor',
+            'create supervisor',
+            'edit supervisor',
+            'delete supervisor',
         ],
     ],
     'roles' => [
@@ -61,4 +81,6 @@ return [
             'Dashboard',
         ],
     ]
+
+    
 ];

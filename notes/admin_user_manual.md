@@ -460,7 +460,7 @@ Admin panel के साथ एक **Mobile App API** भी है जो cust
 |---|---|---|
 | `/api/check-mobile` | POST | Mobile number check करो (registered है या नहीं) |
 | `/api/register` | POST | New customer register करो |
-| `/api/verify-otp` | POST | OTP verify करो |
+| `/api/verify-otp` | POST | | OTP verify करो
 | `/api/resend-otp` | POST | OTP दोबारा भेजो |
 | `/api/logout` | POST | Logout (auth required) |
 | `/api/user` | GET | Current user details (auth required) |
@@ -514,3 +514,83 @@ graph TD
 
 > **Total Modules: 16** (Dashboard + 15 Functional Modules)  
 > **Tech Stack:** Laravel 11, Spatie Permission, Yajra DataTables, Bootstrap 5, Sanctum API Auth
+
+---
+==========================================================================================
+
+
+## 🧭 Admin कैसे उपयोग करें (Quick Steps)
+
+
+
+- **Dashboard (मुख्य पेज):**
+    - Login करें → Sidebar से `Dashboard` खोलें.
+    - ऊपर के summary cards से total bookings और pending/completed quickly देखें.
+
+- **Booking Request Approve / Reject:**
+    - Sidebar → `Bookings` या `Booking Requests` खोलें.
+    - किसी request पर क्लिक करके detail drawer खोलें (customer, locations, items).
+    - `Approve` दबाएँ → system में booking बन जाएगी; `Reject` दबाएँ यदि अस्वीकार करना हो.
+
+- **New Booking Create (Admin से):**
+    - Sidebar → `Bookings` → `Create New`.
+    - Customer चुनें (search), pickup/drop location भरें.
+    - `Items` add करें (quantity set करें) और `Add-Ons` चुनें यदि चाहिए.
+    - Floors, shifting date/time डालें → `Calculate Price` (यदि button है) या Save करते समय backend PricingEngine लागू होगा.
+    - Save → Booking बन जाएगा और `total_amount` दिखेगा; advance payment और vendor commission автоматически compute होते हैं.
+
+- **Vehicle / Category / Item / Item Size / Add-On जोड़ना/बदलना:**
+    - Sidebar → `Master Settings` → संबंधित module (Vehicles, Categories, Items, Item Sizes, Add-Ons).
+    - `Create` पर क्लिक करें → फार्म भरें (नाम, score/value, status) → Save.
+    - Edit करने के लिए row पर `Edit` और बदलाव करके Update करें.
+
+- **Pricing Settings बदलना (Rates):**
+    - Sidebar → `Pricing`.
+    - Key (जैसे `per_km_rate`, `per_floor_charge`, `weekend_surge_percentage`) का मान बदलें और Save करें.
+    - बदलने के बाद नई bookings या booking edits पर नया rate तुरंत प्रभावी होगा.
+
+- **Pricing को verify / test करना:**
+    - Admin → `Bookings` → नया booking बनाते समय विभिन्न items, addons, floors, और date/time बदलकर देखें.
+    - या mobile-app वाले API endpoint `booking/ajax-pricing` (admin UI AJAX भी यही call करता है) से payload भेजकर breakdown लें.
+
+- **Revenue देखना / भुगतान reconcile करना:**
+    - Sidebar → `Revenue` खोलें.
+    - Date filter लगाकर bookings देखें; हर booking की advance और remaining amount टेबल में दिखेगी.
+
+- **Reports generate करना:**
+    - Sidebar → `Reports` → from/to date और status select करें → `Apply` → Export/Print विकल्प देखें (यदि उपलब्ध).
+
+- **User / Role management (Admin panel users):**
+    - Sidebar → `Users` या `Roles`.
+    - New admin/staff user बनाएं, Roles assign करें; Permissions matrix से module-level access control set करें.
+
+- **Feedback देखना:**
+    - Sidebar → `Feedback` → प्रत्येक feedback का comment, rating और booking link देखें; आवश्यक action लें.
+
+---
+
+## 💡 Pricing Calculation — सरल उदाहरण और formula
+
+- Items example: `Sofa (score 5) x 1`, `Table (score 2) x 2` → Total volume score = 5 + 4 = 9.
+- Category auto-select: यदि उस score के लिए `Category.base_fare = ₹1500` और `price_per_point = ₹50` तो
+
+    - Base fare = 1500 + (9 × 50) = 1500 + 450 = ₹1950
+
+- Distance: मान लें total_distance_km = 12 km और `per_km_rate` = ₹20 (first 5 km free)
+    - Extra km = 12 − 5 = 7 → Distance charges = 7 × 20 = ₹140
+
+- Add-Ons: अगर Packing addon = ₹500 → Addon charges = ₹500
+
+- Floors: 2 floors × `per_floor_charge(150)` = ₹300
+
+- Weekend surcharge (10% on base+distance): (1950 + 140) × 10% = ₹209
+
+- Grand Total = 1950 + 140 + 500 + 300 + 209 = ₹3,099
+
+- Advance (default 20%) = 3099 × 20% = ₹620 (approx)
+
+इन values और percentages को आप `Pricing` page से configure कर सकते हैं; PricingEngine सभी steps का breakdown return करता है जिसे UI में दिखाई देता है।
+
+---
+
+

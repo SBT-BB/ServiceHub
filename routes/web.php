@@ -55,6 +55,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{booking}', [BookingController::class, 'update'])->name('update');
         Route::post('/{booking}/cancel', [BookingController::class, 'cancel'])->name('cancel');
         Route::post('/{booking}/complete', [BookingController::class, 'complete'])->name('complete');
+        Route::post('/{booking}/assign-vendor', [BookingController::class, 'assignVendor'])->name('assignVendor');
+    });
+
+    // ── Vendor Booking Portal ──────────────────────────────
+    Route::middleware(['role:Vendor'])->prefix('vendor')->name('vendor.')->group(function () {
+        Route::prefix('booking')->name('booking.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Backend\Vendor\VendorBookingController::class, 'index'])->name('index');
+            Route::get('/{booking}', [\App\Http\Controllers\Backend\Vendor\VendorBookingController::class, 'show'])->name('show');
+            Route::post('/{booking}/respond', [\App\Http\Controllers\Backend\Vendor\VendorBookingController::class, 'respond'])->name('respond');
+            Route::post('/{booking}/assign-supervisor', [\App\Http\Controllers\Backend\Vendor\VendorBookingController::class, 'assignSupervisor'])->name('assignSupervisor');
+        });
     });
 
     // ── User Management ────────────────────────────────────

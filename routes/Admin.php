@@ -11,6 +11,8 @@ use App\Http\Controllers\Backend\Admin\PricingController;
 use App\Http\Controllers\Backend\Admin\RevenueController;
 use App\Http\Controllers\Backend\Admin\FeedbackController;
 use App\Http\Controllers\Backend\Admin\ReportController;
+use App\Http\Controllers\Backend\Admin\ItemSizeController;
+use App\Http\Controllers\Backend\VendorSupervisorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +21,18 @@ use App\Http\Controllers\Backend\Admin\ReportController;
 */
 
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // ── MASTER MANAGEMENT ─────────────────────────────────
+
+    // Vendor‑Supervisor Linking Module
+    Route::prefix('vendor-supervisor')->name('vendor-supervisor.')->group(function () {
+        Route::get('/', [VendorSupervisorController::class, 'index'])->name('index');
+        Route::get('/create', [VendorSupervisorController::class, 'create'])->name('create');
+        Route::post('/', [VendorSupervisorController::class, 'store'])->name('store');
+        Route::get('/{vendor}/edit', [VendorSupervisorController::class, 'edit'])->name('edit');
+        Route::put('/{vendor}', [VendorSupervisorController::class, 'update'])->name('update');
+        Route::delete('/{vendor}/{supervisor}', [VendorSupervisorController::class, 'destroy'])->name('destroy');
+    });
 
     // ── Dashboard (main) ───────────────────────────────────
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -64,12 +78,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/items/{id}',      [ItemController::class, 'destroy'])->name('items.destroy');
 
         // Item Sizes Master
-        Route::get('/item-sizes',              [\App\Http\Controllers\Backend\Admin\ItemSizeController::class, 'index'])->name('item-sizes');
-        Route::get('/item-sizes/create',       [\App\Http\Controllers\Backend\Admin\ItemSizeController::class, 'create'])->name('item-sizes.create');
-        Route::post('/item-sizes',             [\App\Http\Controllers\Backend\Admin\ItemSizeController::class, 'store'])->name('item-sizes.store');
-        Route::get('/item-sizes/{item_size}/edit', [\App\Http\Controllers\Backend\Admin\ItemSizeController::class, 'edit'])->name('item-sizes.edit');
-        Route::put('/item-sizes/{item_size}',      [\App\Http\Controllers\Backend\Admin\ItemSizeController::class, 'update'])->name('item-sizes.update');
-        Route::delete('/item-sizes/{item_size}',   [\App\Http\Controllers\Backend\Admin\ItemSizeController::class, 'destroy'])->name('item-sizes.destroy');
+        Route::get('/item-sizes',              [ItemSizeController::class, 'index'])->name('item-sizes');
+        Route::get('/item-sizes/create',       [ItemSizeController::class, 'create'])->name('item-sizes.create');
+        Route::post('/item-sizes',             [ItemSizeController::class, 'store'])->name('item-sizes.store');
+        Route::get('/item-sizes/{item_size}/edit', [ItemSizeController::class, 'edit'])->name('item-sizes.edit');
+        Route::put('/item-sizes/{item_size}',      [ItemSizeController::class, 'update'])->name('item-sizes.update');
+        Route::delete('/item-sizes/{item_size}',   [ItemSizeController::class, 'destroy'])->name('item-sizes.destroy');
 
         // Add-On Services
         Route::get('/addons',              [AddOnController::class, 'index'])->name('addons');
