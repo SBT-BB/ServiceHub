@@ -68,6 +68,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
+    // ── Supervisor Booking Portal ───────────────────────────
+    Route::middleware(['role:Superviser'])->prefix('supervisor')->name('supervisor.')->group(function () {
+        Route::prefix('booking')->name('booking.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Backend\Supervisor\SupervisorBookingController::class, 'index'])->name('index');
+            Route::get('/{booking}', [\App\Http\Controllers\Backend\Supervisor\SupervisorBookingController::class, 'show'])->name('show');
+            Route::post('/{booking}/respond', [\App\Http\Controllers\Backend\Supervisor\SupervisorBookingController::class, 'respond'])->name('respond');
+            Route::post('/{booking}/start-trip', [\App\Http\Controllers\Backend\Supervisor\SupervisorBookingController::class, 'startTrip'])->name('startTrip');
+            Route::post('/{booking}/start-shifting', [\App\Http\Controllers\Backend\Supervisor\SupervisorBookingController::class, 'startShifting'])->name('startShifting');
+            Route::post('/{booking}/update-items', [\App\Http\Controllers\Backend\Supervisor\SupervisorBookingController::class, 'updateItems'])->name('updateItems');
+            Route::post('/{booking}/complete-shifting', [\App\Http\Controllers\Backend\Supervisor\SupervisorBookingController::class, 'completeShifting'])->name('completeShifting');
+        });
+    });
+
     // ── User Management ────────────────────────────────────
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');

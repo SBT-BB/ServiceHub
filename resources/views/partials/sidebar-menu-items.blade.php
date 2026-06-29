@@ -17,6 +17,7 @@
     $isReportActive        = request()->routeIs('admin.reports');
     $isMastersActive       = $isVehicleActive || $isCategoryActive || $isItemActive || $isAddonActive;
     $isFinanceActive       = $isRevenueActive || $isFeedbackActive || $isReportActive;
+    $isSupervisorActive    = request()->routeIs('supervisor.*');
 @endphp
 
 <ul class="main-menu" id="all-menu-items" role="menu">
@@ -43,6 +44,18 @@
         <a href="{{ route('vendor.booking.index') }}"
            class="side-menu__item {{ request()->routeIs('vendor.booking.*') ? 'active' : '' }}" role="menuitem">
             <span class="side_menu_icon"><i class="ri-calendar-todo-line"></i></span>
+            <span class="side-menu__label">My Bookings</span>
+        </a>
+    </li>
+    @endif
+
+    {{-- ── SUPERVISOR SERVICE LINKS ───────────────────────── --}}
+    @if(auth()->user() && auth()->user()->hasRole('Superviser'))
+    <li class="menu-title" role="presentation">Supervisor Panel</li>
+    <li class="slide">
+        <a href="{{ route('supervisor.booking.index') }}"
+           class="side-menu__item {{ $isSupervisorActive ? 'active' : '' }}" role="menuitem">
+            <span class="side_menu_icon"><i class="ri-user-star-line"></i></span>
             <span class="side-menu__label">My Bookings</span>
         </a>
     </li>
