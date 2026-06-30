@@ -10,10 +10,15 @@ class Setting extends Model
 
     public $timestamps = true;
 
+    protected static $cachedSettings = null;
+
     public static function get(string $key, $default = null)
     {
-        $setting = static::where('key', $key)->first();
-        return $setting ? $setting->value : $default;
+        if (self::$cachedSettings === null) {
+            self::$cachedSettings = static::pluck('value', 'key')->toArray();
+        }
+
+        return array_key_exists($key, self::$cachedSettings) ? self::$cachedSettings[$key] : $default;
     }
 
     public static function set(string $key, $value): void
@@ -22,6 +27,10 @@ class Setting extends Model
             ['key' => $key],
             ['value' => $value]
         );
+
+        if (self::$cachedSettings !== null) {
+            self::$cachedSettings[$key] = $value;
+        }
     }
 }
 
