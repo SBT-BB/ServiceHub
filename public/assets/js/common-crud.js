@@ -48,7 +48,16 @@ $(document).ready(function () {
         var tableConfig = {
             processing: true,
             serverSide: true,
-            ajax: url,
+            ajax: {
+                url: typeof url === 'string' ? url : url.url,
+                data: function (d) {
+                    if (options && typeof options.ajaxData === 'function') {
+                        options.ajaxData(d);
+                    } else if (typeof url === 'object' && typeof url.data === 'function') {
+                        url.data(d);
+                    }
+                }
+            },
             columns: columns,
             order: [[0, 'desc']],
             scrollY: options.scrollY || '60vh',

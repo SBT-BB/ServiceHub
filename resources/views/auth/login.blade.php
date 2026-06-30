@@ -10,7 +10,7 @@
     @include('partials.head-css', ['auth' => 'layout-auth'])
 @endsection
 
-@section('content')
+@section('content') 
 
     <!-- START -->
     <div class="account-pages">
@@ -23,7 +23,10 @@
                         style="border-radius: 15px; border: 2px solid #18bcc7;">
                         <div class="mb-5 text-center">
                             <div class="mb-4">
-                                <img src="{{ asset('assets/images/light-logo.png') }}" alt="Om Homeopathy Logo"
+                                @php
+                                    $logo = \App\Models\Setting::get('logo', 'assets/images/light-logo.png');
+                                @endphp
+                                <img src="{{ asset($logo) }}" alt="Bhandari Packers Logo"
                                     class="img-fluid" style="max-height: 80px;">
                             </div>
                             <h4 class="fw-normal"><span class="fw-bold text-primary">Welcome To Bhandari Packers

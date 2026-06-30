@@ -16,6 +16,12 @@ class UserController extends Controller
         if ($request->ajax()) {
             $users = User::with('roles')->orderBy('created_at', 'desc');
 
+            if ($request->filled('role')) {
+                $users->whereHas('roles', function ($query) use ($request) {
+                    $query->where('name', $request->role);
+                });
+            }
+
             return datatables()->of($users)
                 ->addColumn('image', function ($user) {
                     if ($user->image) {
@@ -81,7 +87,8 @@ class UserController extends Controller
                 ->make(true);
         }
 
-        return view('Backend.User.Index');
+        $roles = Role::all();
+        return view('Backend.User.Index', compact('roles'));
     }
 
     public function create()
