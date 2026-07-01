@@ -150,7 +150,12 @@ $(document).ready(function () {
         }
 
         var toastId = 'toast-' + Date.now();
-        var bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+        var bgClass = 'bg-danger';
+        if (type === 'success') {
+            bgClass = 'bg-success';
+        } else if (type === 'warning') {
+            bgClass = 'bg-warning text-dark';
+        }
 
         var toastHtml =
             '<div id="' + toastId + '" class="toast align-items-center text-white ' + bgClass + ' border-0" role="alert" aria-live="assertive" aria-atomic="true">' +

@@ -715,7 +715,7 @@ $(document).ready(function () {
                 updateExtraChargesDisplay(data.total_amount);
             },
             error: function () {
-                toastr.error('Could not calculate pricing. Please check the form fields.');
+                showToast('Could not calculate pricing. Please check the form fields.', 'danger');
             },
             complete: function () {
                 $('#calcSpinner').addClass('d-none');
@@ -784,11 +784,11 @@ $(document).ready(function () {
             data: $(this).serialize(),
             success: function (res) {
                 if (res.survey_required) {
-                    toastr.warning(res.message, 'Survey Required');
+                    showToast(res.message, 'warning');
                     $btn.prop('disabled', false).html('<i class="ri-save-line me-1"></i> Update Booking');
                     return;
                 }
-                toastr.success(res.message || 'Booking updated!');
+                showToast(res.message || 'Booking updated!', 'success');
                 setTimeout(() => window.location.href = '{{ route('booking.index') }}', 1000);
             },
             error: function (xhr) {
@@ -796,12 +796,12 @@ $(document).ready(function () {
                 var res = xhr.responseJSON || {};
                 if (res.errors) {
                     $.each(res.errors, function (field, msgs) {
-                        toastr.error(msgs[0], 'Validation Error');
+                        showToast(msgs[0], 'danger');
                     });
                 } else if (res.survey_required) {
-                    toastr.warning(res.message, 'Survey Required');
+                    showToast(res.message, 'warning');
                 } else {
-                    toastr.error(res.message || 'Something went wrong!');
+                    showToast(res.message || 'Something went wrong!', 'danger');
                 }
             }
         });

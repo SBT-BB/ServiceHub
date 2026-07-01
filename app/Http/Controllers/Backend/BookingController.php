@@ -349,6 +349,7 @@ class BookingController extends Controller
     public function update(Request $request, Booking $booking)
     {
         $validator = Validator::make($request->all(), [
+            'customer_id'           => 'required|exists:users,id',
             'pickup_location'       => 'required|string|max:500',
             'drop_location'         => 'required|string|max:500',
             'pickup_latitude'       => 'nullable|numeric',
@@ -362,7 +363,7 @@ class BookingController extends Controller
             'shifting_date'         => 'required|date',
             'shifting_time'         => 'required',
             'status'                => 'required|in:pending,confirmed,in_progress,completed,cancelled',
-            'tracking_status'       => 'required|in:pending_confirmation,confirmed,trip_started,shifting_started,pickup_completed,completed',
+            'tracking_status'       => 'required|in:pending_confirmation,confirmed,trip_started,shifting_started,pickup_completed,completed,cancelled',
             'items'                 => 'nullable|array',
             'items.*.id'            => 'exists:items,id',
             'items.*.quantity'      => 'integer|min:1|max:50',
@@ -415,6 +416,7 @@ class BookingController extends Controller
         DB::beginTransaction();
         try {
             $booking->update([
+                'customer_id'              => $request->customer_id,
                 'pickup_location'          => $request->pickup_location,
                 'drop_location'            => $request->drop_location,
                 'pickup_latitude'          => $request->pickup_latitude,

@@ -47,6 +47,13 @@
             <span class="side-menu__label">My Bookings</span>
         </a>
     </li>
+    <li class="slide">
+        <a href="{{ route('vendor.wallet.index') }}"
+           class="side-menu__item {{ request()->routeIs('vendor.wallet.*') ? 'active' : '' }}" role="menuitem">
+            <span class="side_menu_icon"><i class="ri-wallet-3-line"></i></span>
+            <span class="side-menu__label">My Wallet</span>
+        </a>
+    </li>
     @endif
 
     {{-- ── SUPERVISOR SERVICE LINKS ───────────────────────── --}}

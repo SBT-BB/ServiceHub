@@ -66,6 +66,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{booking}/respond', [\App\Http\Controllers\Backend\Vendor\VendorBookingController::class, 'respond'])->name('respond');
             Route::post('/{booking}/assign-supervisor', [\App\Http\Controllers\Backend\Vendor\VendorBookingController::class, 'assignSupervisor'])->name('assignSupervisor');
         });
+
+        Route::prefix('wallet')->name('wallet.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Backend\Vendor\VendorWalletController::class, 'index'])->name('index');
+        });
     });
 
     // ── Supervisor Booking Portal ───────────────────────────
